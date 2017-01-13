@@ -1,3 +1,10 @@
-./db-create-all.sql
-./db-drop-all.sql
-/target/
+.git
+.classpath
+.project
+.flattened-pom.xml
+*.log
+
+.settings/
+
+target/
+xtend-gen/

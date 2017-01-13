@@ -1,8 +1,0 @@
-pt/ua/ieeta/rpacs/model/Image.class
-pt/ua/ieeta/rpacs/model/Patient.class
-pt/ua/ieeta/rpacs/model/DicomTags.class
-pt/ua/ieeta/rpacs/RPacsQuery.class
-pt/ua/ieeta/rpacs/RPacsIndexer.class
-pt/ua/ieeta/rpacs/model/Serie.class
-pt/ua/ieeta/rpacs/model/Study.class
-pt/ua/ieeta/rpacs/RPacsPluginSet.class
