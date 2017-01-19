@@ -29,13 +29,11 @@ class Patient {
 	
 	@NotNull LocalDate birthdate
 	
-	//@Field Integer NumberOfPatientRelatedStudies
+	@OneToMany(mappedBy = "patient", cascade = ALL)
+	List<Study> studies
 	
 	@JsonGetter
 	def getAge() { ChronoUnit.YEARS.between(birthdate, LocalDate.now) }
-	
-	@OneToMany(mappedBy = "patient", cascade = ALL)
-	List<Study> studies
 	
 	def List<HashMap<String, Object>> toFlatDicom() {
 		val List<HashMap<String, Object>> flatResult = new ArrayList<HashMap<String, Object>>

@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter
 import java.util.HashMap
 import java.util.List
 import javax.persistence.Column
-import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.validation.constraints.NotNull
@@ -19,21 +18,18 @@ import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
 class Serie {
 	
 	@ManyToOne
-	@JoinColumn(name="ref_study")
 	@NotNull Study study
 	
 	@Index
 	@Column(unique=true)
 	@NotNull String uid
+	
 	@NotNull Integer number
 	
 	@NotNull String description
 	@NotNull LocalDateTime datetime
 	
 	@NotNull String modality
-	@NotNull String laterality
-	
-	//@Field Integer NumberOfSeriesRelatedInstances
 	
 	@OneToMany(mappedBy = "serie", cascade = ALL)
 	List<Image> images
@@ -47,7 +43,6 @@ class Serie {
 				put(Tag.SeriesDate.tagName, datetime.format(DateTimeFormatter.BASIC_ISO_DATE))
 				put(Tag.SeriesTime.tagName, datetime.format(DateTimeFormatter.ofPattern('HHmmss[.SSS]')))
 				put(Tag.Modality.tagName, modality)
-				put(Tag.Laterality.tagName, laterality)
 			]
 		]
 		

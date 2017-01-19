@@ -38,11 +38,11 @@ class TestRPacsIndexer {
 		
 		Ebean.serverCacheManager.clearAll
 		Image.find.byId(1L) => [
-			Assert.assertEquals('{"id":1,"version":1,"serie":1,"uid":"1.2.392.200046.100.3.8.101983.6649.20160504112902.1.1.1.1","number":1,"photometric":"RGB","columns":3456,"rows":2304}', toJson)
+			Assert.assertEquals('{"id":1,"version":1,"serie":1,"uid":"1.2.392.200046.100.3.8.101983.6649.20160504112902.1.1.1.1","number":1,"photometric":"RGB","columns":3456,"rows":2304,"laterality":"R"}', toJson)
 		]
 		
 		Serie.find.byId(1L) => [
-			Assert.assertEquals('{"id":1,"version":1,"study":1,"uid":"1.2.392.200046.100.3.8.101983.6649.20160504112902.1","number":1,"description":"Color/R","datetime":"2016-05-04T11:29:01","modality":"XC","laterality":"R"}', toJson)
+			Assert.assertEquals('{"id":1,"version":1,"study":1,"uid":"1.2.392.200046.100.3.8.101983.6649.20160504112902.1","number":1,"description":"Color/R","datetime":"2016-05-04T11:29:01","modality":"XC"}', toJson)
 		]
 		
 		Study.find.byId(1L) => [

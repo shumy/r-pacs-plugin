@@ -70,6 +70,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					photometric = dim.getString(Tag.PhotometricInterpretation)
 					columns = dim.getInt(Tag.Columns)
 					rows =  dim.getInt(Tag.Rows)
+					laterality = dim.getString(Tag.Laterality)
 				]
 				
 				if (eImage.id !== null) {
@@ -89,7 +90,6 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					datetime = LocalDateTime.of(date, time)
 					
 					modality = dim.getString(Tag.Modality)
-					laterality = dim.getString(Tag.Laterality)
 				]
 				
 				eSerie.images.add(eImage)
