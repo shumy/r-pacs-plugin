@@ -5,30 +5,49 @@ import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
 import pt.ua.ieeta.rpacs.model.Image
 import shy.xhelper.ebean.XEntity
+import javax.persistence.PrePersist
+import javax.persistence.PreUpdate
 
 @XEntity
 class Annotation {
+	@NotNull Boolean draft
 	
 	@ManyToOne
 	@NotNull Image image
+	
+	@ManyToOne
 	@NotNull Annotator annotator
 	
-	
-	@NotNull ImageLocal local
 	@NotNull ImageQuality quality
-	//@NotNull Integer contrast
+	@NotNull ImageLocal local
 	
 	@NotNull Retinopathy retinopathy
 	@NotNull Maculopathy maculopathy
 	@NotNull Photocoagulation photocoagulation
 	
 	@JsonGetter
-	def getHasPatology() { !(retinopathy === Retinopathy.R0) }
+	def getHasPathology() { !(retinopathy === Retinopathy.R0) }
+	
+	def setDefaults() {
+		draft = true
+		
+		local = ImageLocal.UNDEFINED
+		quality = ImageQuality.UNDEFINED
+			
+		retinopathy = Retinopathy.UNDEFINED
+		maculopathy = Maculopathy.UNDEFINED
+		photocoagulation = Photocoagulation.UNDEFINED
+	}
+	
+	@PrePersist @PreUpdate
+	def void presetDraft() {
+		draft = (retinopathy === Retinopathy.UNDEFINED || maculopathy === Maculopathy.UNDEFINED || photocoagulation === Photocoagulation.UNDEFINED)
+	}
 }
 
-enum ImageLocal { MACULA, OPTIC_DICS, UNDEFINED }
-enum ImageQuality { GOOD, PARTIAL, BAD }
+enum ImageLocal { UNDEFINED, MACULA, OPTIC_DICS }
+enum ImageQuality { UNDEFINED, GOOD, PARTIAL, BAD }
 
-enum Retinopathy { R0, R1, R2, R3 }
-enum Maculopathy { M0, M1 }
-enum Photocoagulation { P0, P1 }
+enum Retinopathy { UNDEFINED, R0, R1, R2, R3 }
+enum Maculopathy { UNDEFINED, M0, M1 }
+enum Photocoagulation { UNDEFINED, P0, P1 }

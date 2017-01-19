@@ -1,8 +1,10 @@
 create table annotation (
   id                            bigserial not null,
+  draft                         boolean not null,
   image_id                      bigint not null,
-  local                         integer not null,
+  annotator_id                  bigint not null,
   quality                       integer not null,
+  local                         integer not null,
   retinopathy                   integer not null,
   maculopathy                   integer not null,
   photocoagulation              integer not null,
@@ -10,11 +12,11 @@ create table annotation (
   deleted                       boolean default false not null,
   created_at                    timestamptz not null,
   updated_at                    timestamptz not null,
+  constraint ck_annotation_quality check ( quality in (0,1,2,3)),
   constraint ck_annotation_local check ( local in (0,1,2)),
-  constraint ck_annotation_quality check ( quality in (0,1,2)),
-  constraint ck_annotation_retinopathy check ( retinopathy in (0,1,2,3)),
-  constraint ck_annotation_maculopathy check ( maculopathy in (0,1)),
-  constraint ck_annotation_photocoagulation check ( photocoagulation in (0,1)),
+  constraint ck_annotation_retinopathy check ( retinopathy in (0,1,2,3,4)),
+  constraint ck_annotation_maculopathy check ( maculopathy in (0,1,2)),
+  constraint ck_annotation_photocoagulation check ( photocoagulation in (0,1,2)),
   constraint pk_annotation primary key (id)
 );
 
@@ -26,6 +28,7 @@ create table annotator (
   deleted                       boolean default false not null,
   created_at                    timestamptz not null,
   updated_at                    timestamptz not null,
+  constraint uq_annotator_name unique (name),
   constraint pk_annotator primary key (id)
 );
 
@@ -49,6 +52,7 @@ create table image (
 create table lesion (
   id                            bigserial not null,
   image_id                      bigint not null,
+  annotator_id                  bigint not null,
   type                          integer not null,
   geometry                      varchar(255) not null,
   version                       bigint not null,
@@ -107,6 +111,7 @@ create table study (
   constraint pk_study primary key (id)
 );
 
+create index ix_annotator_name on annotator (name);
 create index ix_image_uid on image (uid);
 create index ix_patient_pid on patient (pid);
 create index ix_serie_uid on serie (uid);
@@ -114,11 +119,17 @@ create index ix_study_uid on study (uid);
 alter table annotation add constraint fk_annotation_image_id foreign key (image_id) references image (id) on delete restrict on update restrict;
 create index ix_annotation_image_id on annotation (image_id);
 
+alter table annotation add constraint fk_annotation_annotator_id foreign key (annotator_id) references annotator (id) on delete restrict on update restrict;
+create index ix_annotation_annotator_id on annotation (annotator_id);
+
 alter table image add constraint fk_image_serie_id foreign key (serie_id) references serie (id) on delete restrict on update restrict;
 create index ix_image_serie_id on image (serie_id);
 
 alter table lesion add constraint fk_lesion_image_id foreign key (image_id) references image (id) on delete restrict on update restrict;
 create index ix_lesion_image_id on lesion (image_id);
+
+alter table lesion add constraint fk_lesion_annotator_id foreign key (annotator_id) references annotator (id) on delete restrict on update restrict;
+create index ix_lesion_annotator_id on lesion (annotator_id);
 
 alter table serie add constraint fk_serie_study_id foreign key (study_id) references study (id) on delete restrict on update restrict;
 create index ix_serie_study_id on serie (study_id);

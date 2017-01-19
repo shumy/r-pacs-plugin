@@ -15,14 +15,12 @@ class TestRPacsIndexer {
 	
 	@BeforeClass
 	static def void setup() {
-		val config = new ServerConfig => [
+		EbeanServerFactory.create(new ServerConfig => [
 			name = 'db'
 			defaultServer = true
 			
 			loadTestProperties
-		]
-		
-		EbeanServerFactory.create(config)
+		])
 	}
 	
 	@Test

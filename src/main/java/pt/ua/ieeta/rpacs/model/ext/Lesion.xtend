@@ -10,6 +10,8 @@ class Lesion {
 	
 	@ManyToOne
 	@NotNull Image image
+	
+	@ManyToOne
 	@NotNull Annotator annotator
 	
 	
