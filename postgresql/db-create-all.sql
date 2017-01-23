@@ -41,6 +41,7 @@ create table image (
   columns                       integer not null,
   rows                          integer not null,
   laterality                    varchar(255) not null,
+  uri                           varchar(255) not null,
   version                       bigint not null,
   deleted                       boolean default false not null,
   created_at                    timestamptz not null,

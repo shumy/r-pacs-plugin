@@ -1,4 +1,18 @@
-﻿select
+﻿/* reset DB
+delete from annotation;
+delete from lesion;
+delete from annotator;
+
+delete from image;
+delete from serie;
+delete from study;
+delete from patient;
+*/
+
+--query from AnnotationService.allNonAnnotatedImages <annotator_id>
+select * from image where id not in (select image_id from annotation where draft = false and annotator_id = 2)
+
+select
   an.id, draft, us."name",
   case
     when "local"=0 then 'MACULA'
@@ -28,6 +42,3 @@
     when photocoagulation=2 then 'P1'
   end as "maculopathy"
 from annotation an, annotator us where an.annotator_id = us.id
-
-
---delete from annotation

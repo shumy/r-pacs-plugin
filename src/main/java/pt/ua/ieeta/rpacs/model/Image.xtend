@@ -31,6 +31,7 @@ class Image {
 	@NotNull Integer rows
 	
 	@NotNull String laterality
+	@NotNull String uri
 	
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations
@@ -46,9 +47,7 @@ class Image {
 			put(Tag.Columns.tagName, columns)
 			put(Tag.Rows.tagName, rows)
 			put(Tag.Laterality.tagName, laterality)
-			
-			//NOTE: because of dicoogle bug, uri's must be just with one slash -> / 
-			put('uri', '''file:/«serie.study.patient.pid»/«uid».dcm''')
+			put('uri', uri)
 		]
 	}
 	

@@ -71,6 +71,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					columns = dim.getInt(Tag.Columns)
 					rows =  dim.getInt(Tag.Rows)
 					laterality = dim.getString(Tag.Laterality)
+					uri = storage.URI.toString
 				]
 				
 				if (eImage.id !== null) {
