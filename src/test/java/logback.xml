@@ -8,6 +8,8 @@
 		</layout>
 	</appender>
 	
+	<!--<logger name="org.avaje.ebean.SQL" level="TRACE" />-->
+	
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>

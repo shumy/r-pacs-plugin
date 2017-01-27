@@ -1,13 +1,13 @@
 package pt.ua.ieeta.rpacs
 
 import java.net.URI
-import java.util.ArrayList
+import java.util.HashMap
 import org.dcm4che2.data.Tag
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.slf4j.LoggerFactory
 import pt.ua.dicoogle.sdk.QueryInterface
 import pt.ua.dicoogle.sdk.datastructs.SearchResult
-import pt.ua.ieeta.rpacs.model.Patient
+import pt.ua.ieeta.rpacs.model.Image
 import pt.ua.ieeta.rpacs.utils.RPacsPluginBase
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
@@ -19,64 +19,63 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	val URI location
 	
 	val dicTranslate = #{
-		Tag.PatientID.tagName 					-> 'pid',
-		Tag.PatientName.tagName 				-> 'name',
-		Tag.PatientSex.tagName 					-> 'sex',
-		Tag.PatientBirthDate.tagName 			-> 'birthdate', //TODO: value conversion
-		Tag.PatientAge.tagName 					-> 'age',
+		Tag.PatientID.tagName 					-> 'serie.study.patient.pid',
+		Tag.PatientName.tagName 				-> 'serie.study.patient.name',
+		Tag.PatientSex.tagName 					-> 'serie.study.patient.sex',
+		Tag.PatientBirthDate.tagName 			-> 'serie.study.patient.birthdate', //TODO: value conversion
+		Tag.PatientAge.tagName 					-> 'serie.study.patient.age',
 		
-		Tag.StudyInstanceUID.tagName 			-> 'studies.uid',
-		Tag.StudyID.tagName 					-> 'studies.sid',
-		Tag.AccessionNumber.tagName 			-> 'studies.accessionNumber',
-		Tag.StudyDescription.tagName 			-> 'studies.description',
-		Tag.StudyDate.tagName 					-> 'studies.datetime', //TODO: value conversion
-		Tag.StudyTime.tagName 					-> 'studies.datetime', //TODO: value conversion
-		Tag.InstitutionName.tagName 			-> 'studies.institutionName',
-		Tag.InstitutionAddress.tagName 			-> 'studies.institutionAddress',
+		Tag.StudyInstanceUID.tagName 			-> 'serie.study.uid',
+		Tag.StudyID.tagName 					-> 'serie.study.sid',
+		Tag.AccessionNumber.tagName 			-> 'serie.study.accessionNumber',
+		Tag.StudyDescription.tagName 			-> 'serie.study.description',
+		Tag.StudyDate.tagName 					-> 'serie.study.datetime', //TODO: value conversion
+		Tag.StudyTime.tagName 					-> 'serie.study.datetime', //TODO: value conversion
+		Tag.InstitutionName.tagName 			-> 'serie.study.institutionName',
+		Tag.InstitutionAddress.tagName 			-> 'serie.study.institutionAddress',
 		
-		Tag.SeriesInstanceUID.tagName 			-> 'studies.series.uid',
-		Tag.SeriesNumber.tagName 				-> 'studies.series.number',
-		Tag.SeriesDescription.tagName 			-> 'studies.series.description',
-		Tag.SeriesDate.tagName 					-> 'studies.series.datetime', //TODO: value conversion
-		Tag.SeriesTime.tagName 					-> 'studies.series.datetime', //TODO: value conversion
-		Tag.Modality.tagName 					-> 'studies.series.modality',
+		Tag.SeriesInstanceUID.tagName 			-> 'serie.uid',
+		Tag.SeriesNumber.tagName 				-> 'serie.number',
+		Tag.SeriesDescription.tagName 			-> 'serie.description',
+		Tag.SeriesDate.tagName 					-> 'serie.datetime', //TODO: value conversion
+		Tag.SeriesTime.tagName 					-> 'serie.datetime', //TODO: value conversion
+		Tag.Modality.tagName 					-> 'serie.modality',
 		
-		Tag.SOPInstanceUID.tagName 				-> 'studies.series.images.uid',
-		Tag.InstanceNumber.tagName 				-> 'studies.series.images.number',
-		Tag.PhotometricInterpretation.tagName 	-> 'studies.series.images.photometric',
-		Tag.Columns.tagName 					-> 'studies.series.images.columns',
-		Tag.Rows.tagName 						-> 'studies.series.images.rows',
-		Tag.Laterality.tagName 					-> 'studies.series.images.laterality'
+		Tag.SOPInstanceUID.tagName 				-> 'uid',
+		Tag.InstanceNumber.tagName 				-> 'number',
+		Tag.PhotometricInterpretation.tagName 	-> 'photometric',
+		Tag.Columns.tagName 					-> 'columns',
+		Tag.Rows.tagName 						-> 'rows',
+		Tag.Laterality.tagName 					-> 'laterality'
 	}
-	
-	def translate(String field) { dicTranslate.get(field) ?: field }
 	
 	new(String url) { this.location = new URI(url) }
 	
 	override query(String qText, Object... parameters) {
-		logger.info('QUERY - {}', qText)
 		queryText(qText)
 	}
 	
 	def queryText(String qText) {
-		val results = new ArrayList<SearchResult>
-		findPatients(qText).forEach[
-			toFlatDicom.forEach[
-				val uri = new URI(get('uri').toString)
-				results.add(new SearchResult(uri, 1, it))
-			]
+		logger.info('QUERY - {}', qText)
+		val results = findPatients(qText).map[
+			val hMap = toFlatDicom as HashMap<String, Object>
+			new SearchResult(new URI(uri), 1, hMap)
 		]
 		
 		logger.info('QUERY-RESULTS-COUNT - {}', results.size)
 		return results
 	}
 	
-	def findPatients(String qText) {
-		var pWhere = Patient.find.query
+	private def translate(String field) {
+		dicTranslate.get(field) ?: field
+	}
+	
+	private def findPatients(String qText) {
+		var pWhere = Image.find.query
 			.setDisableLazyLoading(true)
-			.fetch('studies')
-			.fetch('studies.series')
-			.fetch('studies.series.images')
+			.fetch('serie')
+			.fetch('serie.study')
+			.fetch('serie.study.patient')
 			.where
 		
 		// <field>:<value> [and <field>:<value>]*

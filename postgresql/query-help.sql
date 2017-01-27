@@ -9,8 +9,11 @@ delete from study;
 delete from patient;
 */
 
+select * from annotation
+select * from annotator
+
 --query from AnnotationService.allNonAnnotatedImages <annotator_id>
-select * from image where id not in (select image_id from annotation where draft = false and annotator_id = 2)
+select * from image where id not in (select image_id from annotation where draft = false and annotator_id = 1)
 
 select
   an.id, draft, us."name",
@@ -28,8 +31,9 @@ select
     when retinopathy=0 then 'UNDEFINED'
     when retinopathy=1 then 'R0'
     when retinopathy=2 then 'R1'
-    when retinopathy=3 then 'R2'
-    when retinopathy=4 then 'R3'
+    when retinopathy=3 then 'R2_M'
+    when retinopathy=4 then 'R2_S'
+    when retinopathy=5 then 'R3'
   end as "retinopathy",
   case
     when maculopathy=0 then 'UNDEFINED'

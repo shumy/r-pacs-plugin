@@ -51,7 +51,8 @@ class TestRPacsIndexer {
 			Assert.assertEquals('{"id":1,"version":1,"pid":"250520161135441091","name":"Anonymized patient","sex":"M","birthdate":"1941-10-18","age":75}', toJson)
 		]
 		
-		val sResults0 = query.queryText('name:Anonymized and  sex:  M and   studies.accessionNumber: R051961172  ')
+		//serie.study.patient.name:Anonymized AND serie.study.patient.sex:M AND serie.study.accessionNumber:R051961172
+		val sResults0 = query.queryText('PatientName:Anonymized and  PatientSex:  M and   AccessionNumber: R051961172  ')
 		Assert.assertEquals(4, sResults0.size)
 		
 		val result0 = sResults0.get(0).extraData
@@ -64,8 +65,9 @@ class TestRPacsIndexer {
 		Assert.assertEquals('{InstanceNumber=1, PatientBirthDate=19411018, StudyDescription=Retinografia, StudyInstanceUID=1.2.826.0.1.3680043.2.1174.4.1.5.1961172, SeriesInstanceUID=1.2.392.200046.100.3.8.101983.6649.20160504112902.2, SeriesDescription=Color/L, PhotometricInterpretation=RGB, SeriesNumber=2, Laterality=L, SOPInstanceUID=1.2.392.200046.100.3.8.101983.6649.20160504112902.2.1.1.1, SeriesTime=112927.000, Rows=2304, InstitutionName=Anonymized institution, StudyDate=20160504, Columns=3456, PatientName=Anonymized patient, uri=./test-data/1.2.392.200046.100.3.8.101983.6649.20160504112902.2.1.1.1.dcm, PatientAge=75, StudyTime=112809.000, InstitutionAddress=, StudyID=0000, PatientSex=M, SeriesDate=20160504, PatientID=250520161135441091, AccessionNumber=R051961172, Modality=XC}', result2.toString)
 		Assert.assertEquals('{InstanceNumber=2, PatientBirthDate=19411018, StudyDescription=Retinografia, StudyInstanceUID=1.2.826.0.1.3680043.2.1174.4.1.5.1961172, SeriesInstanceUID=1.2.392.200046.100.3.8.101983.6649.20160504112902.2, SeriesDescription=Color/L, PhotometricInterpretation=RGB, SeriesNumber=2, Laterality=L, SOPInstanceUID=1.2.392.200046.100.3.8.101983.6649.20160504112902.2.1.2.1, SeriesTime=112927.000, Rows=2304, InstitutionName=Anonymized institution, StudyDate=20160504, Columns=3456, PatientName=Anonymized patient, uri=./test-data/1.2.392.200046.100.3.8.101983.6649.20160504112902.2.1.2.1.dcm, PatientAge=75, StudyTime=112809.000, InstitutionAddress=, StudyID=0000, PatientSex=M, SeriesDate=20160504, PatientID=250520161135441091, AccessionNumber=R051961172, Modality=XC}', result3.toString)
 		
-		val sResults1 = query.queryText('SOPInstanceUID:1.2.392.200046.100.3.8.101983.6649.20160504112902.2.1.1.1')
+		val sResults1 = query.queryText('SOPInstanceUID:1.2.392.200046.100.3.8.101983.6649.20160504112902.1.1.1.1')
 		Assert.assertEquals(1, sResults1.size)
+		Assert.assertEquals('[./test-data/1.2.392.200046.100.3.8.101983.6649.20160504112902.1.1.1.1.dcm 1.0]', sResults1.toString)
 	}
 }
 

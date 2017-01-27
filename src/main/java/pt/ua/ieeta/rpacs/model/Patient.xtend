@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonGetter
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
+import java.util.Map
 import javax.persistence.Column
 import javax.persistence.OneToMany
 import javax.validation.constraints.NotNull
@@ -35,21 +35,14 @@ class Patient {
 	@JsonGetter
 	def getAge() { ChronoUnit.YEARS.between(birthdate, LocalDate.now) }
 	
-	def List<HashMap<String, Object>> toFlatDicom() {
-		val List<HashMap<String, Object>> flatResult = new ArrayList<HashMap<String, Object>>
-		
-		studies.forEach[ study |
-			study.toFlatDicom.forEach[
-				put(Tag.PatientID.tagName, pid)
-				put(Tag.PatientName.tagName, name)
-				put(Tag.PatientSex.tagName, sex)
-				put(Tag.PatientBirthDate.tagName, birthdate.format(DateTimeFormatter.BASIC_ISO_DATE))
-				put(Tag.PatientAge.tagName, age)
-				flatResult.add(it)
-			]
+	def Map<String, Object> toFlatDicom() {
+		new HashMap<String, Object> => [
+			put(Tag.PatientID.tagName, pid)
+			put(Tag.PatientName.tagName, name)
+			put(Tag.PatientSex.tagName, sex)
+			put(Tag.PatientBirthDate.tagName, birthdate.format(DateTimeFormatter.BASIC_ISO_DATE))
+			put(Tag.PatientAge.tagName, age)
 		]
-		
-		return flatResult
 	}
 	
 	def static findByPID(String pid) {

@@ -3,9 +3,9 @@ package pt.ua.ieeta.rpacs.model
 import com.avaje.ebean.annotation.Index
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
+import java.util.Map
 import javax.persistence.Column
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -37,24 +37,19 @@ class Study {
 	@OneToMany(mappedBy = "study", cascade = ALL)
 	List<Serie> series
 	
-	def toFlatDicom() {
-		val List<HashMap<String, Object>> flatResult = new ArrayList<HashMap<String, Object>>
-		
-		series.forEach[ serie |
-			serie.toFlatDicom.forEach[
-				put(Tag.StudyInstanceUID.tagName, uid)
-				put(Tag.StudyID.tagName, sid)
-				put(Tag.AccessionNumber.tagName, accessionNumber)
-				put(Tag.StudyDescription.tagName, description)
-				put(Tag.StudyDate.tagName, datetime.format(DateTimeFormatter.BASIC_ISO_DATE))
-				put(Tag.StudyTime.tagName, datetime.format(DateTimeFormatter.ofPattern('HHmmss[.SSS]')))
-				put(Tag.InstitutionName.tagName, institutionName)
-				put(Tag.InstitutionAddress.tagName, institutionAddress)
-				flatResult.add(it)
-			]
+	def Map<String, Object> toFlatDicom() {
+		new HashMap<String, Object> => [
+			put(Tag.StudyInstanceUID.tagName, uid)
+			put(Tag.StudyID.tagName, sid)
+			put(Tag.AccessionNumber.tagName, accessionNumber)
+			put(Tag.StudyDescription.tagName, description)
+			put(Tag.StudyDate.tagName, datetime.format(DateTimeFormatter.BASIC_ISO_DATE))
+			put(Tag.StudyTime.tagName, datetime.format(DateTimeFormatter.ofPattern('HHmmss[.SSS]')))
+			put(Tag.InstitutionName.tagName, institutionName)
+			put(Tag.InstitutionAddress.tagName, institutionAddress)
+			
+			putAll(patient.toFlatDicom)
 		]
-		
-		return flatResult
 	}
 	
 	def static findByUID(String uid) {

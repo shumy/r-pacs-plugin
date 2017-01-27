@@ -31,8 +31,8 @@ class Annotation {
 	def setDefaults() {
 		draft = true
 		
-		local = ImageLocal.UNDEFINED
 		quality = ImageQuality.UNDEFINED
+		local = ImageLocal.UNDEFINED
 			
 		retinopathy = Retinopathy.UNDEFINED
 		maculopathy = Maculopathy.UNDEFINED
@@ -41,13 +41,33 @@ class Annotation {
 	
 	@PrePersist @PreUpdate
 	def void presetDraft() {
-		draft = (retinopathy === Retinopathy.UNDEFINED || maculopathy === Maculopathy.UNDEFINED || photocoagulation === Photocoagulation.UNDEFINED)
+		if (quality === ImageQuality.UNDEFINED || quality === ImageQuality.BAD) {
+			local = ImageLocal.UNDEFINED
+			retinopathy = Retinopathy.UNDEFINED
+		}
+		
+		if (retinopathy === Retinopathy.UNDEFINED) {
+			maculopathy = Maculopathy.UNDEFINED
+			photocoagulation = Photocoagulation.UNDEFINED
+		}
+		
+		if (retinopathy === Retinopathy.R0) {
+			maculopathy = Maculopathy.M0
+			photocoagulation = Photocoagulation.P0
+		}
+		
+		draft =
+			quality !== ImageQuality.BAD && (
+				retinopathy === Retinopathy.UNDEFINED ||
+				maculopathy === Maculopathy.UNDEFINED ||
+				photocoagulation === Photocoagulation.UNDEFINED
+			)
 	}
 }
 
 enum ImageLocal { UNDEFINED, MACULA, OPTIC_DICS }
 enum ImageQuality { UNDEFINED, GOOD, PARTIAL, BAD }
 
-enum Retinopathy { UNDEFINED, R0, R1, R2, R3 }
+enum Retinopathy { UNDEFINED, R0, R1, R2_M, R2_S, R3 }
 enum Maculopathy { UNDEFINED, M0, M1 }
-enum Photocoagulation { UNDEFINED, P0, P1 }
+enum Photocoagulation { UNDEFINED, P0, P1, P2 }

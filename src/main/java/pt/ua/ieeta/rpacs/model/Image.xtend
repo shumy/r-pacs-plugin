@@ -3,6 +3,7 @@ package pt.ua.ieeta.rpacs.model
 import com.avaje.ebean.annotation.Index
 import java.util.HashMap
 import java.util.List
+import java.util.Map
 import javax.persistence.Column
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -39,7 +40,7 @@ class Image {
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Lesion> lesions
 	
-	def HashMap<String, Object> toFlatDicom() {
+	def Map<String, Object> toFlatDicom() {
 		new HashMap<String, Object> => [
 			put(Tag.SOPInstanceUID.tagName, uid)
 			put(Tag.InstanceNumber.tagName, number)
@@ -48,6 +49,8 @@ class Image {
 			put(Tag.Rows.tagName, rows)
 			put(Tag.Laterality.tagName, laterality)
 			put('uri', uri)
+			
+			putAll(serie.toFlatDicom)
 		]
 	}
 	
