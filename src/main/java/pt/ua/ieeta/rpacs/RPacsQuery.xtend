@@ -11,6 +11,8 @@ import pt.ua.ieeta.rpacs.model.Image
 import pt.ua.ieeta.rpacs.utils.RPacsPluginBase
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
+import java.util.Collections
+import java.util.List
 
 class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	static val logger = LoggerFactory.getLogger(RPacsQuery)
@@ -85,6 +87,9 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 				val field = fieldAndValue.get(0).trim.translate
 				val value = fieldAndValue.get(1).trim
 				pWhere = pWhere.contains(field, value)
+			} else {
+				logger.info('QUERY-NON-VALID')
+				return Collections.EMPTY_LIST as List<Image>
 			}
 		}
 		
