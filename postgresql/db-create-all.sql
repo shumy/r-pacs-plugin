@@ -14,9 +14,9 @@ create table annotation (
   updated_at                    timestamptz not null,
   constraint ck_annotation_quality check ( quality in (0,1,2,3)),
   constraint ck_annotation_local check ( local in (0,1,2)),
-  constraint ck_annotation_retinopathy check ( retinopathy in (0,1,2,3,4)),
+  constraint ck_annotation_retinopathy check ( retinopathy in (0,1,2,3,4,5)),
   constraint ck_annotation_maculopathy check ( maculopathy in (0,1,2)),
-  constraint ck_annotation_photocoagulation check ( photocoagulation in (0,1,2)),
+  constraint ck_annotation_photocoagulation check ( photocoagulation in (0,1,2,3)),
   constraint pk_annotation primary key (id)
 );
 
