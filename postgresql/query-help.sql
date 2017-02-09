@@ -9,8 +9,14 @@ delete from study;
 delete from patient;
 */
 
-select * from annotation
-select * from annotator
+select * from annotation;
+select * from lesion;
+select * from annotator;
+
+select * from image;
+select * from serie;
+select * from study;
+select * from patient;
 
 --query from AnnotationService.allNonAnnotatedImages <annotator_id>
 select * from image where id not in (select image_id from annotation where draft = false and annotator_id = 1)

@@ -86,8 +86,9 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					number = dim.getInt(Tag.SeriesNumber)
 					
 					description = dim.getString(Tag.SeriesDescription)?:''
-					val date = LocalDate.parse(dim.getString(Tag.SeriesDate), DateTimeFormatter.BASIC_ISO_DATE)
-					val time = LocalTime.parse(dim.getString(Tag.SeriesTime)?:'000000', DateTimeFormatter.ofPattern('HHmmss[.SSS]'))
+					
+					val date = getDate(dim.getString(Tag.SeriesDate))
+					val time = getTime(dim.getString(Tag.SeriesTime))
 					datetime = LocalDateTime.of(date, time)
 					
 					modality = dim.getString(Tag.Modality)
@@ -108,8 +109,9 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					accessionNumber = dim.getString(Tag.AccessionNumber)
 					
 					description = dim.getString(Tag.StudyDescription)?:''
-					val date = LocalDate.parse(dim.getString(Tag.StudyDate), DateTimeFormatter.BASIC_ISO_DATE)
-					val time = LocalTime.parse(dim.getString(Tag.StudyTime)?:'000000', DateTimeFormatter.ofPattern('HHmmss[.SSS]'))
+					
+					val date = getDate(dim.getString(Tag.StudyDate))
+					val time = getTime(dim.getString(Tag.StudyTime))
 					datetime = LocalDateTime.of(date, time)
 					
 					institutionName = dim.getString(Tag.InstitutionName)?:''
@@ -128,8 +130,8 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 				val ePatient = Patient.findByPID(patientID) ?: new Patient => [
 					pid = patientID
 					it.name = dim.getString(Tag.PatientName)
-					sex = dim.getString(Tag.PatientSex)
-					birthdate = LocalDate.parse(dim.getString(Tag.PatientBirthDate), DateTimeFormatter.BASIC_ISO_DATE)
+					sex = dim.getString(Tag.PatientSex)?:'O'
+					birthdate = getDate(dim.getString(Tag.PatientBirthDate))
 				]
 				
 				ePatient.studies.add(eStudy)
@@ -140,9 +142,26 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 		} catch (Exception e) {
 			Ebean.rollbackTransaction
 			logger.error('INDEX-FAILED - {}', storage.URI)
+			e.printStackTrace
 			return false
 		} finally {
 			dicomStream.close
 		}
+	}
+	
+	private def getDate(String dateTxt) {
+		var date = dateTxt?:'00000101'
+		if (date.length > 8)
+			date = date.substring(0, 8)
+			
+		LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE)
+	}
+	
+	private def getTime(String timeTxt) {
+		var time = timeTxt?:'000000'
+		if (time.length > 10)
+			time = time.substring(0, 10)
+		
+		return LocalTime.parse(time, DateTimeFormatter.ofPattern('HHmmss[.SSS]'))
 	}
 }
