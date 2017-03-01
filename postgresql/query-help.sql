@@ -24,8 +24,9 @@ select * from image where id not in (select image_id from annotation where draft
 select
   an.id, draft, us."name",
   case
-    when "local"=0 then 'MACULA'
-    when "local"=1 then 'OPTIC_DICS'
+    when "local"=0 then 'UNDEFINED'
+    when "local"=1 then 'MACULA'
+    when "local"=2 then 'OPTIC_DICS'
   end as "local",
   case
     when quality=0 then 'UNDEFINED'
@@ -50,5 +51,6 @@ select
     when photocoagulation=0 then 'UNDEFINED'
     when photocoagulation=1 then 'P0'
     when photocoagulation=2 then 'P1'
-  end as "maculopathy"
+    when photocoagulation=3 then 'P2'
+  end as "photocoagulation"
 from annotation an, annotator us where an.annotator_id = us.id

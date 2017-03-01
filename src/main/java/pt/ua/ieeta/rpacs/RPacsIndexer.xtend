@@ -34,13 +34,12 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 	}
 	
 	override index(Iterable<StorageInputStream> streams, Object... objects) {
-		logger.info('Start Index-List: ' + streams.size)
 		new Task[
 			val report = new IndexReport2
 			streams.forEach[
 				if (indexStream)
 					report.addIndexFile
-				else 
+				else
 					report.addError
 			]
 			
