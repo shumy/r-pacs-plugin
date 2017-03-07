@@ -49,8 +49,9 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 	
 	def boolean indexStream(StorageInputStream storage) {
 		logger.info('INDEXING - {}', storage.URI)
-		val dicomStream = new org.dcm4che2.io.DicomInputStream(new BufferedInputStream(storage.inputStream))
+		var org.dcm4che2.io.DicomInputStream dicomStream = null
 		try {
+			dicomStream = new org.dcm4che2.io.DicomInputStream(new BufferedInputStream(storage.inputStream))
 			dicomStream.handler = new StopTagInputHandler(Tag.PixelData)
 			val dim = dicomStream.readDicomObject
 			
@@ -139,12 +140,12 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 			logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
 			return true
 		} catch (Exception e) {
+			logger.error('INDEX-FAILED - {} {}', storage.URI, e.message)
 			Ebean.rollbackTransaction
-			logger.error('INDEX-FAILED - {}', storage.URI)
 			e.printStackTrace
 			return false
 		} finally {
-			dicomStream.close
+			dicomStream?.close
 		}
 	}
 	
