@@ -37,10 +37,11 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 		new Task[
 			val report = new IndexReport2
 			streams.forEach[
-				if (indexStream)
-					report.addIndexFile
-				else
-					report.addError
+				if (URI.path.endsWith('.dcm'))
+					if (indexStream)
+						report.addIndexFile
+					else
+						report.addError
 			]
 			
 			return report
