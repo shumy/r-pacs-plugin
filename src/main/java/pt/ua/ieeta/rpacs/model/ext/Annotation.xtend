@@ -10,6 +10,7 @@ import javax.persistence.PreUpdate
 
 @XEntity
 class Annotation {
+	//this was introduced in case there is an automatic process for image quality assessment!
 	@NotNull Boolean draft
 	
 	@ManyToOne
@@ -53,7 +54,6 @@ class Annotation {
 		
 		if (retinopathy === Retinopathy.R0) {
 			maculopathy = Maculopathy.M0
-			photocoagulation = Photocoagulation.P0
 		}
 		
 		draft =

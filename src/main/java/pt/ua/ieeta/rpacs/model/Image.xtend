@@ -5,11 +5,13 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import javax.persistence.Column
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.validation.constraints.NotNull
 import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.ext.Annotation
+import pt.ua.ieeta.rpacs.model.ext.Dataset
 import pt.ua.ieeta.rpacs.model.ext.Lesion
 import shy.xhelper.ebean.XEntity
 
@@ -33,6 +35,9 @@ class Image {
 	
 	@NotNull String laterality
 	@NotNull String uri
+	
+	@ManyToMany(mappedBy = "images")
+	List<Dataset> dataset
 	
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations

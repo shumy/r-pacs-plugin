@@ -18,6 +18,7 @@ import static pt.ua.ieeta.rpacs.utils.ClassLoaderRunner.*
 import pt.ua.ieeta.rpacs.model.ext.Annotator
 import pt.ua.ieeta.rpacs.model.ext.Annotation
 import pt.ua.ieeta.rpacs.model.ext.Lesion
+import pt.ua.ieeta.rpacs.model.ext.Dataset
 
 @PluginImplementation
 class RPacsPluginSet extends PluginBase {
@@ -57,6 +58,7 @@ class RPacsPluginSet extends PluginBase {
 			addClass(Annotator)
 			addClass(Annotation)
 			addClass(Lesion)
+			addClass(Dataset)
 			
 			//force Driver class load here to solve some dicoogle classLoader issues!
 			runWith(RPacsPluginSet)[
