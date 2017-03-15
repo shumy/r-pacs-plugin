@@ -3,6 +3,7 @@
 create table dataset (
   id                            bigserial not null,
   is_default                    boolean default false not null,
+  name                          varchar(255) not null,
   version                       bigint not null,
   deleted                       boolean default false not null,
   created_at                    timestamptz not null,
@@ -41,12 +42,12 @@ alter table annotator add constraint fk_annotator_current_dataset_id foreign key
 --procedure to create random datasets of specified size
 --use as: select create_random_dataset(<size>);
 --setup as a default: update dataset set is_default = true where id = <id>
-create or replace function create_random_dataset(size integer)
+create or replace function create_random_dataset(size integer, name varchar)
   returns void as $$
 declare
    dt_id integer;
 begin
-  insert into dataset (version, deleted, created_at, updated_at) values (1, false, current_timestamp, current_timestamp) returning id into dt_id;
+  insert into dataset (name, version, deleted, created_at, updated_at) values (name, 1, false, current_timestamp, current_timestamp) returning id into dt_id;
 
   insert into dataset_image
     select dt_id, id from image order by random() limit size;

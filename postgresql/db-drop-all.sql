@@ -4,6 +4,20 @@ drop index if exists ix_annotation_image_id;
 alter table if exists annotation drop constraint if exists fk_annotation_annotator_id;
 drop index if exists ix_annotation_annotator_id;
 
+alter table if exists annotator drop constraint if exists fk_annotator_current_dataset_id;
+
+alter table if exists dataset_image drop constraint if exists fk_dataset_image_dataset;
+drop index if exists ix_dataset_image_dataset;
+
+alter table if exists dataset_image drop constraint if exists fk_dataset_image_image;
+drop index if exists ix_dataset_image_image;
+
+alter table if exists dataset_annotator drop constraint if exists fk_dataset_annotator_dataset;
+drop index if exists ix_dataset_annotator_dataset;
+
+alter table if exists dataset_annotator drop constraint if exists fk_dataset_annotator_annotator;
+drop index if exists ix_dataset_annotator_annotator;
+
 alter table if exists image drop constraint if exists fk_image_serie_id;
 drop index if exists ix_image_serie_id;
 
@@ -22,6 +36,12 @@ drop index if exists ix_study_patient_id;
 drop table if exists annotation cascade;
 
 drop table if exists annotator cascade;
+
+drop table if exists dataset cascade;
+
+drop table if exists dataset_image cascade;
+
+drop table if exists dataset_annotator cascade;
 
 drop table if exists image cascade;
 
