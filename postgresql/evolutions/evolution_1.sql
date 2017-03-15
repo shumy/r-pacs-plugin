@@ -36,7 +36,6 @@ alter table dataset_annotator add constraint fk_dataset_annotator_annotator fore
 create index ix_dataset_annotator_annotator on dataset_annotator (annotator_id);
 
 alter table annotator add column current_dataset_id bigint;
-alter table annotator add constraint uq_annotator_current_dataset_id unique (current_dataset_id);
 alter table annotator add constraint fk_annotator_current_dataset_id foreign key (current_dataset_id) references dataset (id) on delete restrict on update restrict;
 
 --procedure to create random datasets of specified size

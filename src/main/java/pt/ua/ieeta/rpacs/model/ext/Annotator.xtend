@@ -4,9 +4,9 @@ import com.avaje.ebean.annotation.Index
 import java.util.List
 import javax.persistence.Column
 import javax.persistence.ManyToMany
+import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
 import shy.xhelper.ebean.XEntity
-import javax.persistence.OneToOne
 
 @XEntity
 class Annotator {
@@ -18,7 +18,7 @@ class Annotator {
 	//anonymized annotator identification
 	@NotNull String alias
 	
-	@OneToOne
+	@ManyToOne
 	Dataset currentDataset
 	
 	@ManyToMany(mappedBy = "annotators")
