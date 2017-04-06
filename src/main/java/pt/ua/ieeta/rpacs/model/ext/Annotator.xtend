@@ -25,19 +25,32 @@ class Annotator {
 	Dataset currentDataset
 	
 	@ManyToMany(mappedBy = "annotators")
-	List<Dataset> dataset
+	List<Dataset> datasets
+	
+	def Pointer getOrPreCreatePointer(NodeType nType) {
+		Pointer.find.query.where
+			.eq('type', nType)
+			.eq('dataset', currentDataset)
+			.eq('annotator', this)
+		.findUnique ?: (new Pointer => [
+			dataset = currentDataset
+			annotator = this
+			type = nType
+			last = -1L
+			next = 0L
+		])
+	}
 	
 	def static Annotator getOrCreateAnnotator(String username) {
 		Annotator.find.query.where.eq('name', username).findUnique ?: Ebean.execute[
-			val annotator = new Annotator() => [
+			new Annotator() => [
 				name = username
 				alias = UUID.randomUUID.toString
 				currentDataset = Dataset.findDefault
-				dataset = new ArrayList<Dataset>(1)
-				dataset.add(currentDataset)
+				datasets = new ArrayList<Dataset>(1)
+				datasets.add(currentDataset)
+				save
 			]
-			annotator.save
-			return annotator
 		]
 	}
 }

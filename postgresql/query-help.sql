@@ -1,56 +1,26 @@
-﻿/* reset DB
+﻿/*
+delete from node;
 delete from annotation;
-delete from lesion;
-delete from annotator;
+delete from pointer;
 
-delete from image;
-delete from serie;
-delete from study;
-delete from patient;
+update pointer set next = 1, last = 0;
 */
 
-select * from annotation;
-select * from lesion;
-select * from annotator;
-
-select * from image;
-select * from serie;
-select * from study;
-select * from patient;
-
---query from AnnotationService.allNonAnnotatedImages <annotator_id>
-select * from image where id not in (select image_id from annotation where draft = false and annotator_id = 1)
-
+--dataset pointers--
 select
-  an.id, draft, us."name",
-  case
-    when "local"=0 then 'UNDEFINED'
-    when "local"=1 then 'MACULA'
-    when "local"=2 then 'OPTIC_DICS'
-  end as "local",
-  case
-    when quality=0 then 'UNDEFINED'
-    when quality=1 then 'GOOD'
-    when quality=2 then 'PARTIAL'
-    when quality=3 then 'BAD'
-  end as "quality",
-  case
-    when retinopathy=0 then 'UNDEFINED'
-    when retinopathy=1 then 'R0'
-    when retinopathy=2 then 'R1'
-    when retinopathy=3 then 'R2_M'
-    when retinopathy=4 then 'R2_S'
-    when retinopathy=5 then 'R3'
-  end as "retinopathy",
-  case
-    when maculopathy=0 then 'UNDEFINED'
-    when maculopathy=1 then 'M0'
-    when maculopathy=2 then 'M1'
-  end as "maculopathy",
-  case
-    when photocoagulation=0 then 'UNDEFINED'
-    when photocoagulation=1 then 'P0'
-    when photocoagulation=2 then 'P1'
-    when photocoagulation=3 then 'P2'
-  end as "photocoagulation"
-from annotation an, annotator us where an.annotator_id = us.id
+  ds.id,
+  ds.name,
+  (select name from node_type where id = p.type_id) as type,
+  p.next,
+  p.last
+from dataset ds, pointer p where ds.id = p.dataset_id
+and p.annotator_id = 1
+and p.dataset_id = 6;
+
+--annotation nodes--
+select
+  a.id,
+  (select name from annotator where id = a.annotator_id) as annotator,
+  (select name from node_type where id = n.type_id) as type,
+  n.fields
+from annotation a, node n where a.id = n.annotation_id and a.id = 1;

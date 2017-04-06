@@ -9,16 +9,9 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import org.slf4j.LoggerFactory
 import pt.ua.dicoogle.sdk.PluginBase
 import pt.ua.dicoogle.sdk.settings.ConfigurationHolder
-import pt.ua.ieeta.rpacs.model.Image
-import pt.ua.ieeta.rpacs.model.Patient
-import pt.ua.ieeta.rpacs.model.Serie
-import pt.ua.ieeta.rpacs.model.Study
+import pt.ua.ieeta.rpacs.utils.DefaultConfig
 
 import static pt.ua.ieeta.rpacs.utils.ClassLoaderRunner.*
-import pt.ua.ieeta.rpacs.model.ext.Annotator
-import pt.ua.ieeta.rpacs.model.ext.Annotation
-import pt.ua.ieeta.rpacs.model.ext.Lesion
-import pt.ua.ieeta.rpacs.model.ext.Dataset
 
 @PluginImplementation
 class RPacsPluginSet extends PluginBase {
@@ -50,15 +43,7 @@ class RPacsPluginSet extends PluginBase {
 		
 		val sConfig = new ServerConfig => [
 			defaultServer = true
-			addClass(Patient)
-			addClass(Study)
-			addClass(Serie)
-			addClass(Image)
-			
-			addClass(Annotator)
-			addClass(Annotation)
-			addClass(Lesion)
-			addClass(Dataset)
+			DefaultConfig.addClasses(it)
 			
 			//force Driver class load here to solve some dicoogle classLoader issues!
 			runWith(RPacsPluginSet)[

@@ -1,5 +1,7 @@
 package pt.ua.ieeta.rpacs.model
 
+import com.avaje.ebean.Ebean
+import com.avaje.ebean.RawSqlBuilder
 import com.avaje.ebean.annotation.Index
 import java.util.HashMap
 import java.util.List
@@ -12,7 +14,6 @@ import javax.validation.constraints.NotNull
 import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.ext.Annotation
 import pt.ua.ieeta.rpacs.model.ext.Dataset
-import pt.ua.ieeta.rpacs.model.ext.Lesion
 import shy.xhelper.ebean.XEntity
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
@@ -37,13 +38,19 @@ class Image {
 	@NotNull String uri
 	
 	@ManyToMany(mappedBy = "images")
-	List<Dataset> dataset
+	List<Dataset> datasets
 	
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations
 	
-	@OneToMany(mappedBy = "image", cascade = ALL)
-	List<Lesion> lesions
+	def getSequence(Dataset ds) {
+		val query = Ebean.createSqlQuery('''
+			select seq from (select row_number() over() - 1 as seq, image_id as image from dataset_image where dataset_id = «ds.id») as dataset
+			where image = «id»;
+		''')
+		
+		return query.findUnique.getInteger('seq')
+	}
 	
 	def Map<String, Object> toFlatDicom() {
 		new HashMap<String, Object> => [
@@ -61,5 +68,19 @@ class Image {
 	
 	def static findByUID(String uid) {
 		Image.find.query.where.eq('uid', uid).findUnique
+	}
+	
+	def static getImageRefs(Dataset ds, Integer offset, Integer limit) {
+		val sql = '''
+			select img.id, img.uid from image img, dataset_image ds where img.id = ds.image_id
+			and dataset_id = «ds.id»
+			offset «offset» limit «limit»;
+		'''
+		
+		val query = Ebean.find(Image) => [
+			rawSql = RawSqlBuilder.parse(sql).create
+		]
+		
+		return query.findList
 	}
 }

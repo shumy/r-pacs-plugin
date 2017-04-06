@@ -64,7 +64,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 			
 			val tx = Ebean.beginTransaction
 				//process Image---------------------------------------------------------------
-				val eImage = Image.findByUID(imageUID) ?: new Image => [
+				val eImage = Image.findByUID(imageUID) ?: (new Image => [
 					uid = imageUID
 					number = dim.getInt(Tag.InstanceNumber)
 					
@@ -73,7 +73,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					rows =  dim.getInt(Tag.Rows)
 					laterality = dim.getString(Tag.Laterality)
 					uri = storage.URI.toString
-				]
+				])
 				
 				if (eImage.id !== null) {
 					tx.rollback
@@ -82,7 +82,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 				}
 				
 				//process Serie---------------------------------------------------------------
-				val eSerie = Serie.findByUID(serieUID) ?: new Serie => [
+				val eSerie = Serie.findByUID(serieUID) ?: (new Serie => [
 					uid = serieUID
 					number = dim.getInt(Tag.SeriesNumber)
 					
@@ -93,7 +93,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					datetime = LocalDateTime.of(date, time)
 					
 					modality = dim.getString(Tag.Modality)
-				]
+				])
 				
 				eSerie.images.add(eImage)
 				if (eSerie.id !== null) {
@@ -104,7 +104,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 				}
 				
 				//process Study---------------------------------------------------------------
-				val eStudy = Study.findByUID(studyUID) ?: new Study => [
+				val eStudy = Study.findByUID(studyUID) ?: (new Study => [
 					uid = studyUID
 					sid = dim.getString(Tag.StudyID)
 					accessionNumber = dim.getString(Tag.AccessionNumber)
@@ -117,7 +117,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					
 					institutionName = dim.getString(Tag.InstitutionName)?:''
 					institutionAddress = dim.getString(Tag.InstitutionAddress)?:''
-				]
+				])
 				
 				eStudy.series.add(eSerie)
 				if (eStudy.id !== null) {
@@ -128,12 +128,12 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 				}
 				
 				//process Patient-------------------------------------------------------------
-				val ePatient = Patient.findByPID(patientID) ?: new Patient => [
+				val ePatient = Patient.findByPID(patientID) ?: (new Patient => [
 					pid = patientID
 					it.name = dim.getString(Tag.PatientName)
 					sex = dim.getString(Tag.PatientSex)?:'O'
 					birthdate = getDate(dim.getString(Tag.PatientBirthDate))
-				]
+				])
 				
 				ePatient.studies.add(eStudy)
 				ePatient.save
