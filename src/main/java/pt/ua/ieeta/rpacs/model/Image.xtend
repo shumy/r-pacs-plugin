@@ -72,8 +72,8 @@ class Image {
 	
 	def static getImageRefs(Dataset ds, Integer offset, Integer limit) {
 		val sql = '''
-			select img.id, img.uid from image img, dataset_image ds where img.id = ds.image_id
-			and dataset_id = «ds.id»
+			select image_id as id, (select uid from image where id = image_id) as uid from dataset_image
+			where dataset_id = «ds.id»
 			offset «offset» limit «limit»;
 		'''
 		
