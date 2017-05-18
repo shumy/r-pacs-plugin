@@ -1,6 +1,9 @@
 package pt.ua.ieeta.rpacs.utils
 
+import com.avaje.ebean.config.DocStoreConfig
 import com.avaje.ebean.config.ServerConfig
+import org.avaje.datasource.DataSourceConfig
+import org.avaje.datasource.pool.ConnectionPool
 import pt.ua.ieeta.rpacs.model.Image
 import pt.ua.ieeta.rpacs.model.Patient
 import pt.ua.ieeta.rpacs.model.Serie
@@ -13,6 +16,7 @@ import pt.ua.ieeta.rpacs.model.ext.NodeType
 import pt.ua.ieeta.rpacs.model.ext.Pointer
 
 class DefaultConfig {
+	
 	static def addClasses(ServerConfig it) {
 		addClass(Patient)
 		addClass(Study)
@@ -25,5 +29,33 @@ class DefaultConfig {
 		addClass(Pointer)
 		addClass(Node)
 		addClass(NodeType)
+	}
+	
+	static def ServerConfig config(String sDocUrl, String sDbUrl, String sDriver, String sUsername, String sPassword) {
+		val dbConfig = new DataSourceConfig => [
+			url = sDbUrl
+			driver = sDriver
+			username = sUsername
+			password = sPassword
+		]
+		
+		val esConfig = new DocStoreConfig => [
+			url = sDocUrl
+			active = true
+			generateMapping = true
+			dropCreate = true
+		]
+		
+		val sConfig = new ServerConfig => [
+			defaultServer = true
+			DefaultConfig.addClasses(it)
+			
+			dataSourceConfig = dbConfig
+			dataSource = new ConnectionPool('db', dbConfig)
+			
+			docStoreConfig = esConfig
+		]
+		
+		return sConfig
 	}
 }

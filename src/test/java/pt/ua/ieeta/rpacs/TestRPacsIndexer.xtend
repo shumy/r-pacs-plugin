@@ -26,7 +26,7 @@ class TestRPacsIndexer {
 	@Test
 	def void indexAndQueryDicomFile() {
 		val indexer = new RPacsIndexer
-		val query = new RPacsQuery('h2://mem:tests')
+		val query = new RPacsQuery//('h2://mem:tests')
 		
 		//index files...
 		indexer.indexStream(new DicomInputStream('1.2.392.200046.100.3.8.101983.6649.20160504112902.1.1.1.1.dcm'))

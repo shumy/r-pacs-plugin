@@ -18,7 +18,7 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	static val logger = LoggerFactory.getLogger(RPacsQuery)
 	
 	@Accessors val name = 'r-pacs-query'
-	val URI location
+	//val URI location
 	
 	val dicTranslate = #{
 		Tag.PatientID.tagName 					-> 'serie.study.patient.pid',
@@ -51,7 +51,7 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 		Tag.Laterality.tagName 					-> 'laterality'
 	}
 	
-	new(String url) { this.location = new URI(url) }
+	//new(String url) { this.location = new URI(url) }
 	
 	override query(String qText, Object... parameters) {
 		queryText(qText)

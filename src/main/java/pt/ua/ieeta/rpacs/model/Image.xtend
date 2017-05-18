@@ -2,6 +2,9 @@ package pt.ua.ieeta.rpacs.model
 
 import com.avaje.ebean.Ebean
 import com.avaje.ebean.RawSqlBuilder
+import com.avaje.ebean.annotation.DocEmbedded
+import com.avaje.ebean.annotation.DocProperty
+import com.avaje.ebean.annotation.DocStore
 import com.avaje.ebean.annotation.Index
 import java.util.HashMap
 import java.util.List
@@ -19,8 +22,11 @@ import shy.xhelper.ebean.XEntity
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
 
 @XEntity
+@DocStore(indexName = Image.INDEX)
 class Image {
+	public static val INDEX = 'r_pacs_image'
 	
+	@DocEmbedded(doc = 'uid,number,description,datetime,modality,study(uid,sid,accessionNumber,description,datetime,institutionName,institutionAddress,patient(pid,name,sex,birthdate))')
 	@ManyToOne
 	@NotNull Serie serie
 	
@@ -35,11 +41,14 @@ class Image {
 	@NotNull Integer rows
 	
 	@NotNull String laterality
+	
+	@DocProperty(enabled = false)
 	@NotNull String uri
 	
 	@ManyToMany(mappedBy = "images")
 	List<Dataset> datasets
 	
+	@DocEmbedded(doc = 'annotator(name),nodes(type(name), fields)')
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations
 	

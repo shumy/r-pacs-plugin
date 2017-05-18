@@ -10,12 +10,11 @@ update pointer set next = 1, last = 0;
 select
   ds.id,
   ds.name,
+  (select name from annotator where p.annotator_id = id) as annotator,
   (select name from node_type where id = p.type_id) as type,
   p.next,
   p.last
-from dataset ds, pointer p where ds.id = p.dataset_id
-and p.annotator_id = 1
-and p.dataset_id = 6;
+from dataset ds, pointer p where ds.id = p.dataset_id;
 
 --annotation nodes--
 select
@@ -23,4 +22,9 @@ select
   (select name from annotator where id = a.annotator_id) as annotator,
   (select name from node_type where id = n.type_id) as type,
   n.fields
-from annotation a, node n where a.id = n.annotation_id and a.id = 1;
+from annotation a, node n where a.id = n.annotation_id
+order by a.id, type desc;
+
+--jsonb queries
+select id, fields->'local' as local from node where fields->>'quality' != 'BAD' order by annotation_id;
+select * from node where fields ? 'quality';

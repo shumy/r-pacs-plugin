@@ -3,8 +3,6 @@ package pt.ua.ieeta.rpacs
 import com.avaje.ebean.EbeanServerFactory
 import com.avaje.ebean.config.ServerConfig
 import net.xeoh.plugins.base.annotations.PluginImplementation
-import org.avaje.datasource.DataSourceConfig
-import org.avaje.datasource.pool.ConnectionPool
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.slf4j.LoggerFactory
 import pt.ua.dicoogle.sdk.PluginBase
@@ -25,43 +23,32 @@ class RPacsPluginSet extends PluginBase {
 		
 		//with settings.configuration
 		val it = settings.configuration
-			val sUrl = getString('url')
+			val sDocUrl = getString('docUrl')
+			val sDbUrl = getString('dbUrl')
 			val sDriver = getString('driver')
 			val sUsername = getString('username')
 			val sPassword = getString('password')
 		
-		if (sUrl === null || sDriver === null || sUsername === null || sPassword === null)
-			throw new RuntimeException('R-PACS PluginSet -> Settings ERROR: Please provide (url, driver, username, password) for database!')
+		if (sDocUrl === null || sDbUrl === null || sDriver === null || sUsername === null || sPassword === null)
+			throw new RuntimeException('R-PACS PluginSet -> Settings ERROR: Please provide (docUrl, dbUrl, driver, username, password) for database!')
 		
-		logger.info('R-PACS PluginSet -> Using datasource: {}', sUrl)
-		val dsConfig = new DataSourceConfig => [
-			url = sUrl
-			driver = sDriver
-			username = sUsername
-			password = sPassword
-		]
+		logger.info('R-PACS PluginSet -> Using database: {}', sDbUrl)
+		logger.info('R-PACS PluginSet -> Using elastic-search: {}', sDocUrl)
 		
-		val sConfig = new ServerConfig => [
-			defaultServer = true
-			DefaultConfig.addClasses(it)
+		runWith(RPacsPluginSet)[
+			val sConfig = DefaultConfig.config(sDocUrl, sDbUrl, sDriver, sUsername, sPassword)
+			logger.info('R-PACS PluginSet -> Settings OK')
 			
-			//force Driver class load here to solve some dicoogle classLoader issues!
-			runWith(RPacsPluginSet)[
-				dataSourceConfig = dsConfig
-				dataSource = new ConnectionPool('db', dsConfig)
-			]
+			init(sConfig)
 		]
-		
-		logger.info('R-PACS PluginSet -> Settings OK')
-		init(sUrl, sConfig)
 	}
 	
-	def void init(String url, ServerConfig config) {
+	def void init(ServerConfig config) {
 		logger.info('R-PACS PluginSet -> Initializing')
 		EbeanServerFactory.create(config)
 		
 		indexPlugins.add(new RPacsIndexer)
-		queryPlugins.add(new RPacsQuery(url))
+		queryPlugins.add(new RPacsQuery)
 		logger.info('R-PACS PluginSet -> Ready')
 	}
 	
