@@ -20,7 +20,7 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	@Accessors val name = 'r-pacs-query'
 	//val URI location
 	
-	val dicTranslate = #{
+	public val dicTranslate = #{
 		Tag.PatientID.tagName 					-> 'serie.study.patient.pid',
 		Tag.PatientName.tagName 				-> 'serie.study.patient.name',
 		Tag.PatientSex.tagName 					-> 'serie.study.patient.sex',

@@ -26,7 +26,7 @@ import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
 class Image {
 	public static val INDEX = 'r_pacs_image'
 	
-	@DocEmbedded(doc = 'uid,number,description,datetime,modality,study(uid,sid,accessionNumber,description,datetime,institutionName,institutionAddress,patient(pid,name,sex,birthdate))')
+	@DocEmbedded(doc = 'id,uid,number,description,datetime,modality,study(id,uid,sid,accessionNumber,description,datetime,institutionName,institutionAddress,patient(id,pid,name,sex,birthdate))')
 	@ManyToOne
 	@NotNull Serie serie
 	
@@ -48,7 +48,7 @@ class Image {
 	@ManyToMany(mappedBy = "images")
 	List<Dataset> datasets
 	
-	@DocEmbedded(doc = 'annotator(name),nodes(type(name), fields)')
+	@DocEmbedded(doc = 'id,annotator(id,name),nodes(id,type(name), fields)')
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations
 	

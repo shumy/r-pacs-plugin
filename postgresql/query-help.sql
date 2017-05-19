@@ -19,6 +19,7 @@ from dataset ds, pointer p where ds.id = p.dataset_id;
 --annotation nodes--
 select
   a.id,
+  a.image_id as image,
   (select name from annotator where id = a.annotator_id) as annotator,
   (select name from node_type where id = n.type_id) as type,
   n.fields

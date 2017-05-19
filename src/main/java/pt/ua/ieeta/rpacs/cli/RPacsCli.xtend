@@ -1,12 +1,11 @@
 package pt.ua.ieeta.rpacs.cli
 
-import com.avaje.ebean.EbeanServer
-import com.avaje.ebean.EbeanServerFactory
+import java.io.OutputStream
 import java.io.PrintStream
 import picocli.CommandLine
 import pt.ua.ieeta.rpacs.model.Image
 import pt.ua.ieeta.rpacs.utils.DefaultConfig
-import java.io.OutputStream
+import pt.ua.ieeta.rpacs.utils.DocSearch
 
 class RPacsCli {
 	
@@ -14,31 +13,63 @@ class RPacsCli {
 		val OutputStream no = []
 		System.setErr(new PrintStream(no))
 		
-		val cmd = CommandLine.parse(new RCommand, args)
-		if (cmd.help) {
-			CommandLine.usage(new RCommand, System.out)
-			return
-		}
-		
-		if (cmd.drop) {
-			val srv = initServer
+		try {
+			val cmd = CommandLine.parse(new RCommand, args)
+			if (cmd.help) {
+				CommandLine.usage(new RCommand, System.out)
+				return
+			}
 			
-			srv.docStore.dropIndex(Image.INDEX)
-			println('''Drop Index (Image -> «Image.INDEX»)''')
+			val srv = DefaultConfig.initServerFromProperties
 			
-			return
-		}
-		
-		if (cmd.index) {
-			val srv = initServer
+			if (cmd.search !== null) {
+				val int from = cmd.from ?: 0
+				val int size = cmd.size ?: 100
+				val results = DocSearch.search(cmd.search, from, size)
+				
+				var n = 0
+				for (it: results) {
+					n++
+					println('''«n»: {id: «id», uid: «uid», annotations: «annotations.length»}''')
+				}
+			}
 			
+			if (cmd.create !== null) {
+				if (cmd.create == 'all') {
+					srv.docStore.createIndex(Image.INDEX, Image.INDEX)
+					println('''Create Index (Image -> «Image.INDEX»)''')
+				} else {
+					srv.docStore.createIndex(cmd.create, cmd.create)
+					println('''Create Index -> «cmd.create»''')
+				}
+				
+				return
+			}
 			
-			val startTime = System.currentTimeMillis
-			srv.docStore.indexAll(Image)
-			val endTime   = System.currentTimeMillis
-			println('''Indexed (Image -> «Image.INDEX») in «endTime - startTime» ms''')
+			if (cmd.drop !== null) {
+				if (cmd.drop == 'all') {
+					srv.docStore.dropIndex(Image.INDEX)
+					println('''Drop Index (Image -> «Image.INDEX»)''')
+				} else {
+					srv.docStore.dropIndex(cmd.drop)
+					println('''Drop Index -> «cmd.drop»''')
+				}
+				
+				return
+			}
 			
-			return
+			if (cmd.index !== null) {
+				if (cmd.index == 'all') {
+					val startTime = System.currentTimeMillis
+					srv.docStore.indexAll(Image)
+					val endTime   = System.currentTimeMillis
+					println('''Indexed (Image -> «Image.INDEX») in «endTime - startTime» ms''')
+				}
+				
+				return
+			}
+		} catch (Throwable ex) {
+			ex.printStackTrace(System.out)
 		}
 		
 		//index by query:
@@ -51,18 +82,7 @@ class RPacsCli {
 
 			server.docStore.indexByQuery(query, 1000)
 		*/
-		
-
 	}
 	
-	def static EbeanServer initServer() {
-		val sDocUrl = 'http://127.0.0.1:9200'
-		val sDbUrl = 'jdbc:postgresql:r-pacs'
-		val sDriver = 'org.postgresql.Driver'
-		val sUsername = 'r-pacs'
-		val sPassword = 'r-pacs-password'
-		
-		val sConfig = DefaultConfig.config(sDocUrl, sDbUrl, sDriver, sUsername, sPassword)
-		return EbeanServerFactory.create(sConfig)
-	}
+
 }
