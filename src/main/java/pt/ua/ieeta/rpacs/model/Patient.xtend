@@ -15,6 +15,7 @@ import org.dcm4che2.data.Tag
 import shy.xhelper.ebean.XEntity
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
+import java.time.LocalDateTime
 
 // model from http://dicomiseasy.blogspot.pt/2011/12/chapter-4-dicom-objects-in-chapter-3.html
 @XEntity
@@ -27,13 +28,16 @@ class Patient {
 	@NotNull String name
 	@NotNull String sex
 	
-	@NotNull LocalDate birthdate
+	@NotNull LocalDateTime birthdate
 	
 	@OneToMany(mappedBy = "patient", cascade = ALL)
 	List<Study> studies
 	
 	@JsonGetter
-	def getAge() { ChronoUnit.YEARS.between(birthdate, LocalDate.now) }
+	def getAge() { ChronoUnit.YEARS.between(birthdate, LocalDateTime.now) }
+	
+	def void setBirthdate(LocalDate date) { birthdate = date.atTime(0, 0) }
+	def LocalDate getBirthdate() { return birthdate.toLocalDate }
 	
 	def Map<String, Object> toFlatDicom() {
 		new HashMap<String, Object> => [

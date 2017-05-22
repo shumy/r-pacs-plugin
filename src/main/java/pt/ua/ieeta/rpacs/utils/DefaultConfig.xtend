@@ -48,7 +48,7 @@ class DefaultConfig {
 		val esConfig = new DocStoreConfig => [
 			url = sDocUrl
 			active = true
-			generateMapping = true
+			//generateMapping = true
 		]
 		
 		val sConfig = new ServerConfig => [

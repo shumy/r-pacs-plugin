@@ -1,62 +1,105 @@
 package pt.ua.ieeta.rpacs.utils
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.Collections
-import java.util.HashMap
+import java.util.LinkedList
 import java.util.List
-import java.util.Map
+import java.util.regex.Pattern
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import org.apache.commons.lang.StringUtils
+import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.Image
+
+import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
 
 class DocSearch {
 	public static val JSON = MediaType.parse("application/json; charset=utf-8")
 	
-	def static List<Image> search(String searchText, int from, int size) {
-		/*val fields = parse(searchText)
-		if (fields.size === 0)
-			return Collections.EMPTY_LIST
+	public static val mappings = #{
+		Tag.PatientID.tagName.toLowerCase 					-> 'serie.study.patient.pid',
+		Tag.PatientName.tagName.toLowerCase 				-> 'serie.study.patient.name',
+		Tag.PatientSex.tagName.toLowerCase 					-> 'serie.study.patient.sex',
+		Tag.PatientBirthDate.tagName.toLowerCase 			-> 'serie.study.patient.birthdate', //TODO: value conversion
+		Tag.PatientAge.tagName.toLowerCase 					-> 'serie.study.patient.age',
 		
-		var ExpressionList<Image> express = Ebean.defaultServer.find(Image).text.must
-		for (field: fields.keySet)
-			express = express.match(field, fields.get(field))
+		Tag.StudyInstanceUID.tagName.toLowerCase 			-> 'serie.study.uid',
+		Tag.StudyID.tagName.toLowerCase 					-> 'serie.study.sid',
+		Tag.AccessionNumber.tagName.toLowerCase 			-> 'serie.study.accessionNumber',
+		Tag.StudyDescription.tagName.toLowerCase 			-> 'serie.study.description',
+		Tag.StudyDate.tagName.toLowerCase 					-> 'serie.study.datetime', //TODO: value conversion
+		Tag.StudyTime.tagName.toLowerCase 					-> 'serie.study.datetime', //TODO: value conversion
+		Tag.InstitutionName.tagName.toLowerCase 			-> 'serie.study.institutionName',
+		Tag.InstitutionAddress.tagName.toLowerCase 			-> 'serie.study.institutionAddress',
 		
-		express.findList*/
+		Tag.SeriesInstanceUID.tagName.toLowerCase 			-> 'serie.uid',
+		Tag.SeriesNumber.tagName.toLowerCase 				-> 'serie.number',
+		Tag.SeriesDescription.tagName.toLowerCase 			-> 'serie.description',
+		Tag.SeriesDate.tagName.toLowerCase 					-> 'serie.datetime', //TODO: value conversion
+		Tag.SeriesTime.tagName.toLowerCase 					-> 'serie.datetime', //TODO: value conversion
+		Tag.Modality.tagName.toLowerCase 					-> 'serie.modality',
 		
-		val tree = post('http://localhost:9200/_search', '''{
-			"from": «from», "size": «size»,
-			"stored_fields": [ "_type", "_id" ],
-			"query": {
-				"query_string": {
-					"query": "«searchText»"
-				}
-			}
-		}''')
+		Tag.SOPInstanceUID.tagName.toLowerCase 				-> 'uid',
+		Tag.InstanceNumber.tagName.toLowerCase 				-> 'number',
+		Tag.PhotometricInterpretation.tagName.toLowerCase 	-> 'photometric',
+		Tag.Columns.tagName.toLowerCase 					-> 'columns',
+		Tag.Rows.tagName.toLowerCase 						-> 'rows',
+		Tag.Laterality.tagName.toLowerCase 					-> 'laterality',
 		
-		val hits = tree.get('hits')
-		val images = hits.get('hits').filter[ get('_type').asText == 'image' ].map[ get('_id').asLong ].toList
-		return Image.find.query.where.idIn(images)
-			.findList
+		//annotations
+		'annotation' 										-> 'annotations.nodes.type.name',
+		'field' 											-> 'annotations.nodes.fields',
+		
+		//others
+		' to ' 												-> ' TO ',
+		' and ' 											-> ' AND ',
+		' or ' 												-> ' OR '
 	}
 	
-	def static Map<String, String> parse(String qText) {
-		val map = new HashMap<String, String>
-		// <field>:<value> [and <field>:<value>]*
-		for(it: qText.split('and')) {
-			val fieldAndValue = split(':')
-			if (fieldAndValue.length === 2) {
-				val field = fieldAndValue.get(0).trim
-				val value = fieldAndValue.get(1).trim
-				map.put(field, value)
-			} else {
-				println('QUERY-NON-VALID')
-				return Collections.EMPTY_MAP
-			}
+	public static val String[] keyMaps = mappings.keySet
+	public static val String[] valueMaps = mappings.values
+	
+	def static List<Image> search(String qText, int from, int size) {
+		val searchText = dimDecode(qText)
+		println('''SEARCH-DECODED: "«qText»" -> "«searchText»"''')
+		
+		val results = try {
+			val images = post('http://localhost:9200/' + Image.INDEX + '/image/_search', '''{
+				"from": «from», "size": «size»,
+				"sort": ["_doc"],
+				"stored_fields": [ "_id" ],
+				"query": {
+					"query_string": {
+						"query": "«searchText»",
+						"analyzer": "standard"
+					}
+				}
+			}''')
+			
+			if (images.size !== 0)
+				Image.find.query
+					.setDisableLazyLoading(true)
+					.fetch('serie')
+					.fetch('serie.study')
+					.fetch('serie.study.patient')
+				.where.idIn(images).findList
+			else
+				Collections.EMPTY_LIST
+		} catch (Throwable ex) {
+			println('SEARCH-ERROR: ' + ex.message)
+			Collections.EMPTY_LIST
 		}
 		
-		return map
+		println('SEARCH-RESULTS: ' + results.size)
+		return results
+	}
+	
+	def static dimDecode(String qText) {
+		val lowerSearch = qText.toLowerCase
+		val datesFixed = lowerSearch.replaceAll('\\[([0-9]{4})([0-9]{2})([0-9]{2}) to ([0-9]{4})([0-9]{2})([0-9]{2})\\]', '[$1-$2-$3 TO $4-$5-$6]')
+		
+		StringUtils.replaceEach(datesFixed, keyMaps, valueMaps)
 	}
 	
 	def static post(String url, String json) {
@@ -67,7 +110,16 @@ class DocSearch {
 		val response = client.newCall(request).execute
 		val rJson = response.body.string
 		
-		val mapper = new ObjectMapper
-		return mapper.readTree(rJson)
+		//can't use jackson because of dicoogle incompatible versions!!!
+		val p = Pattern.compile('\"_id\":\\s*\"([0-9]*)\"')
+		val m = p.matcher(rJson)
+		
+		val ids = new LinkedList<String>
+		while(m.find) {
+			val id = m.group(1)
+			ids.add(id)
+		}
+		
+		return ids
 	}
 }
