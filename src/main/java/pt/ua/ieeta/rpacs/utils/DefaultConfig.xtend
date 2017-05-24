@@ -19,6 +19,7 @@ import pt.ua.ieeta.rpacs.model.ext.Node
 import pt.ua.ieeta.rpacs.model.ext.NodeType
 import pt.ua.ieeta.rpacs.model.ext.Pointer
 import com.avaje.ebean.config.JsonConfig
+import com.avaje.ebean.annotation.DocStoreMode
 
 class DefaultConfig {
 	
@@ -47,7 +48,9 @@ class DefaultConfig {
 		
 		val esConfig = new DocStoreConfig => [
 			url = sDocUrl
+			persist = DocStoreMode.IGNORE
 			active = true
+			
 			//generateMapping = true
 		]
 		
