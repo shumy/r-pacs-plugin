@@ -8,6 +8,7 @@ import pt.ua.dicoogle.sdk.QueryInterface
 import pt.ua.dicoogle.sdk.datastructs.SearchResult
 import pt.ua.ieeta.rpacs.utils.DocSearch
 import pt.ua.ieeta.rpacs.utils.RPacsPluginBase
+import pt.ua.ieeta.rpacs.model.Image
 
 class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	static val logger = LoggerFactory.getLogger(RPacsQuery)
@@ -30,6 +31,11 @@ class RPacsQuery extends RPacsPluginBase implements QueryInterface {
 	}
 	
 	private def findImages(String qText) {
+		if (qText.startsWith('SOPInstanceUID:')){
+			val keyValue = qText.split(':')
+			return newArrayList(Image.findByUID(keyValue.get(1)))
+		}
+		
 		DocSearch.search(qText, 0, 100)
 	}
 }
