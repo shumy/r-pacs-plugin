@@ -2,7 +2,9 @@ package pt.ua.ieeta.rpacs.utils
 
 import com.avaje.ebean.EbeanServer
 import com.avaje.ebean.EbeanServerFactory
+import com.avaje.ebean.annotation.DocStoreMode
 import com.avaje.ebean.config.DocStoreConfig
+import com.avaje.ebean.config.JsonConfig
 import com.avaje.ebean.config.ServerConfig
 import java.io.FileInputStream
 import java.util.Properties
@@ -18,8 +20,7 @@ import pt.ua.ieeta.rpacs.model.ext.Dataset
 import pt.ua.ieeta.rpacs.model.ext.Node
 import pt.ua.ieeta.rpacs.model.ext.NodeType
 import pt.ua.ieeta.rpacs.model.ext.Pointer
-import com.avaje.ebean.config.JsonConfig
-import com.avaje.ebean.annotation.DocStoreMode
+import pt.ua.ieeta.rpacs.model.ext.PropertyMap
 
 class DefaultConfig {
 	
@@ -35,6 +36,8 @@ class DefaultConfig {
 		addClass(Pointer)
 		addClass(Node)
 		addClass(NodeType)
+		
+		addClass(PropertyMap)
 	}
 	
 	static def ServerConfig config(String sDocUrl, String sDbUrl, String sDriver, String sUsername, String sPassword) {

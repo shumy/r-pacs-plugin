@@ -140,7 +140,7 @@ insert into node_type (name, version, deleted, created_at, updated_at)
 insert into node_type (name, version, deleted, created_at, updated_at)
   values ('diagnosis', 1, false, current_timestamp, current_timestamp);
 
-  insert into node_type (name, version, deleted, created_at, updated_at)
+insert into node_type (name, version, deleted, created_at, updated_at)
   values ('lesions', 1, false, current_timestamp, current_timestamp);
 ---------------------------------------
 
