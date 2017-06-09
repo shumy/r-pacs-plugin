@@ -1,0 +1,87 @@
+@startuml
+
+class Patient {
+  pid: string
+  name: string
+  sex: string
+  birthdate: LocalDateTime
+}
+
+class Study {
+  uid: string
+  sid: string
+  accessionNumber: string
+  description: string
+  datetime: LocalDateTime
+  institutionName: string
+  institutionAddress: string
+}
+
+class Serie {
+  uid: string
+  number: int
+  description: string
+  datetime: LocalDateTime
+  modality: string
+}
+
+class Image {
+  uid: string
+  number: int
+  photometric: string
+  columns: int
+  rows: int
+  laterality: string
+  uri: string
+}
+
+Patient *-right- Study:studies
+Study *-right- Serie:series
+Serie *-right- Image:images
+
+Image "*"--"*" ext.Dataset
+Image o-- ext.Annotation
+
+
+package ext {
+  class Dataset {
+    isDefault: boolean
+    name: string
+  }
+  
+  class Annotation {
+  }
+
+  class Node {
+    fields: Map<String, Object>
+  }
+
+  class NodeType {
+    name: string
+  }
+
+  class Annotator {
+    name: string
+    alias: string
+  }
+
+  class Pointer {
+    last: long
+    next: long
+  }
+
+  Dataset "*"--"*" Annotator
+  Dataset o-- Pointer
+
+  Annotator --> Dataset:currentDataset
+
+  Annotation --> Annotator
+  Annotation *-- Node
+
+  Node --> NodeType:type
+
+  Pointer --> Annotator
+  Pointer --> NodeType
+}
+
+@enduml
