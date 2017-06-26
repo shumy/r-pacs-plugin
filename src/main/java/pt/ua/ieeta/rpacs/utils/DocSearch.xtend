@@ -79,10 +79,11 @@ class DocSearch {
 			
 			if (images.size !== 0)
 				Image.find.query
-					.setDisableLazyLoading(true)
+					//.setDisableLazyLoading(true)
 					.fetch('serie')
 					.fetch('serie.study')
 					.fetch('serie.study.patient')
+					.fetch('annotations.nodes')
 				.where.idIn(images).findList
 			else
 				Collections.EMPTY_LIST

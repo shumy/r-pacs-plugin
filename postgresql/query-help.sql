@@ -16,6 +16,13 @@ select
   p.last
 from dataset ds, pointer p where ds.id = p.dataset_id;
 
+--annotator stats--
+select
+  (select name from annotator where id = annotator_id) as annotator,
+  count(*) as total from annotation
+group by annotator
+order by total desc;
+
 --annotation nodes--
 select
   a.id,
