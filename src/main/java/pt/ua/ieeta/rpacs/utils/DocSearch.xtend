@@ -13,6 +13,7 @@ import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.Image
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
+import pt.ua.ieeta.rpacs.model.ext.Dataset
 
 class DocSearch {
 	public static val JSON = MediaType.parse("application/json; charset=utf-8")
@@ -21,23 +22,23 @@ class DocSearch {
 		Tag.PatientID.tagName.toLowerCase 					-> 'serie.study.patient.pid',
 		Tag.PatientName.tagName.toLowerCase 				-> 'serie.study.patient.name',
 		Tag.PatientSex.tagName.toLowerCase 					-> 'serie.study.patient.sex',
-		Tag.PatientBirthDate.tagName.toLowerCase 			-> 'serie.study.patient.birthdate', //TODO: value conversion
+		Tag.PatientBirthDate.tagName.toLowerCase 			-> 'serie.study.patient.birthdate',
 		Tag.PatientAge.tagName.toLowerCase 					-> 'serie.study.patient.age',
 		
 		Tag.StudyInstanceUID.tagName.toLowerCase 			-> 'serie.study.uid',
 		Tag.StudyID.tagName.toLowerCase 					-> 'serie.study.sid',
 		Tag.AccessionNumber.tagName.toLowerCase 			-> 'serie.study.accessionNumber',
 		Tag.StudyDescription.tagName.toLowerCase 			-> 'serie.study.description',
-		Tag.StudyDate.tagName.toLowerCase 					-> 'serie.study.datetime', //TODO: value conversion
-		Tag.StudyTime.tagName.toLowerCase 					-> 'serie.study.datetime', //TODO: value conversion
+		Tag.StudyDate.tagName.toLowerCase 					-> 'serie.study.datetime',
+		Tag.StudyTime.tagName.toLowerCase 					-> 'serie.study.datetime',
 		Tag.InstitutionName.tagName.toLowerCase 			-> 'serie.study.institutionName',
 		Tag.InstitutionAddress.tagName.toLowerCase 			-> 'serie.study.institutionAddress',
 		
 		Tag.SeriesInstanceUID.tagName.toLowerCase 			-> 'serie.uid',
 		Tag.SeriesNumber.tagName.toLowerCase 				-> 'serie.number',
 		Tag.SeriesDescription.tagName.toLowerCase 			-> 'serie.description',
-		Tag.SeriesDate.tagName.toLowerCase 					-> 'serie.datetime', //TODO: value conversion
-		Tag.SeriesTime.tagName.toLowerCase 					-> 'serie.datetime', //TODO: value conversion
+		Tag.SeriesDate.tagName.toLowerCase 					-> 'serie.datetime',
+		Tag.SeriesTime.tagName.toLowerCase 					-> 'serie.datetime',
 		Tag.Modality.tagName.toLowerCase 					-> 'serie.modality',
 		
 		Tag.SOPInstanceUID.tagName.toLowerCase 				-> 'uid',
@@ -49,7 +50,22 @@ class DocSearch {
 		
 		//annotations
 		'annotation' 										-> 'annotations.nodes.type.name',
-		'field' 											-> 'annotations.nodes.fields',
+		//'field' 											-> 'annotations.nodes.fields',
+		
+		//search ui alias
+		'image'												-> 'uid',
+		'datetime'											-> 'serie.datetime',
+		
+		'birthdate'											-> 'serie.study.patient.birthdate',
+		'sex'												-> 'serie.study.patient.sex',
+		
+		'readability'										-> 'annotations.nodes.fields.quality',
+		'centered'											-> 'annotations.nodes.fields.local',
+		'retinopathy'										-> 'annotations.nodes.fields.retinopathy',
+		'maculopathy'										-> 'annotations.nodes.fields.maculopathy',
+		'photocoagulation'									-> 'annotations.nodes.fields.photocoagulation',
+		'comorbidities'										-> 'annotations.nodes.fields.diseases',
+		'lesions' 											-> 'annotations.nodes.fields.lesions.type',
 		
 		//others
 		' to ' 												-> ' TO ',
@@ -61,6 +77,12 @@ class DocSearch {
 	public static val String[] valueMaps = mappings.values
 	
 	def static List<Image> search(String qText, int from, int size) {
+		val specialResults = specialSearch(qText)
+		if (specialResults != null) {
+			println('''SPECIAL-SEARCH: "«qText»" -> «specialResults.size»''')
+			return specialResults
+		}
+		
 		val searchText = dimDecode(qText)
 		println('''SEARCH-DECODED: "«qText»" -> "«searchText»"''')
 		
@@ -94,6 +116,23 @@ class DocSearch {
 		
 		println('SEARCH-RESULTS: ' + results.size)
 		return results
+	}
+	
+	def static specialSearch(String qText) {
+		//search for dataset
+		if (qText.startsWith('dataset:')) {
+			val keyValue = qText.split(':')
+			val dsName = if (keyValue.length == 2) keyValue.get(1) else '' 
+			
+			val ds = Dataset.findByName(dsName)
+			if (ds !== null) {
+				return ds.images
+			} else {
+				return Collections.EMPTY_LIST
+			}
+		}
+		
+		return null
 	}
 	
 	def static dimDecode(String qText) {

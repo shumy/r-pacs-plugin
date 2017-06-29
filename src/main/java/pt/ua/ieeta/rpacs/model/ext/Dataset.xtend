@@ -29,4 +29,8 @@ class Dataset {
 	def static findDefault() {
 		Dataset.find.query.where.eq('isDefault', true).findUnique
 	}
+	
+	def static findByName(String name) {
+		Dataset.find.query.where.eq('name', name).findUnique
+	}
 }
