@@ -77,14 +77,16 @@ class DocSearch {
 	public static val String[] valueMaps = mappings.values
 	
 	def static List<Image> search(String qText, int from, int size) {
-		val specialResults = specialSearch(qText)
+		val lowerSearch = qText.toLowerCase
+		
+		val specialResults = specialSearch(lowerSearch)
 		if (specialResults != null) {
-			println('''SPECIAL-SEARCH: "«qText»" -> «specialResults.size»''')
+			println('''SPECIAL-SEARCH: "«lowerSearch»" -> «specialResults.size»''')
 			return specialResults
 		}
 		
-		val searchText = dimDecode(qText)
-		println('''SEARCH-DECODED: "«qText»" -> "«searchText»"''')
+		val searchText = dimDecode(lowerSearch)
+		println('''SEARCH-DECODED: "«lowerSearch»" -> "«searchText»"''')
 		
 		val results = try {
 			val images = post('http://localhost:9200/' + Image.INDEX + '/image/_search', '''{
@@ -135,10 +137,8 @@ class DocSearch {
 		return null
 	}
 	
-	def static dimDecode(String qText) {
-		val lowerSearch = qText.toLowerCase
+	def static dimDecode(String lowerSearch) {
 		val datesFixed = lowerSearch.replaceAll('\\[([0-9]{4})([0-9]{2})([0-9]{2}) to ([0-9]{4})([0-9]{2})([0-9]{2})\\]', '[$1-$2-$3 TO $4-$5-$6]')
-		
 		StringUtils.replaceEach(datesFixed, keyMaps, valueMaps)
 	}
 	
