@@ -45,10 +45,11 @@ class Image {
 	@DocProperty(enabled = false)
 	@NotNull String uri
 	
+	@DocEmbedded(doc = 'name')
 	@ManyToMany(mappedBy = "images")
 	List<Dataset> datasets
 	
-	@DocEmbedded(doc = 'id,annotator(id,name),nodes(id,type(name), fields)')
+	@DocEmbedded(doc = 'id,annotator(alias),nodes(id,type(name), fields)')
 	@OneToMany(mappedBy = "image", cascade = ALL)
 	List<Annotation> annotations
 	

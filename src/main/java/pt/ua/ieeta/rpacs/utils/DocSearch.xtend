@@ -13,7 +13,6 @@ import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.Image
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
-import pt.ua.ieeta.rpacs.model.ext.Dataset
 
 class DocSearch {
 	public static val JSON = MediaType.parse("application/json; charset=utf-8")
@@ -67,6 +66,8 @@ class DocSearch {
 		'comorbidities'										-> 'annotations.nodes.fields.diseases',
 		'lesions' 											-> 'annotations.nodes.fields.lesions.type',
 		
+		'dataset'											-> 'datasets.name',
+		
 		//others
 		' to ' 												-> ' TO ',
 		' and ' 											-> ' AND ',
@@ -78,12 +79,6 @@ class DocSearch {
 	
 	def static List<Image> search(String qText, int from, int size) {
 		val lowerSearch = qText.toLowerCase
-		
-		val specialResults = specialSearch(lowerSearch)
-		if (specialResults != null) {
-			println('''SPECIAL-SEARCH: "«lowerSearch»" -> «specialResults.size»''')
-			return specialResults
-		}
 		
 		val searchText = dimDecode(lowerSearch)
 		println('''SEARCH-DECODED: "«lowerSearch»" -> "«searchText»"''')
@@ -118,23 +113,6 @@ class DocSearch {
 		
 		println('SEARCH-RESULTS: ' + results.size)
 		return results
-	}
-	
-	def static specialSearch(String qText) {
-		//search for dataset
-		if (qText.startsWith('dataset:')) {
-			val keyValue = qText.split(':')
-			val dsName = if (keyValue.length == 2) keyValue.get(1) else '' 
-			
-			val ds = Dataset.findByName(dsName)
-			if (ds !== null) {
-				return ds.images
-			} else {
-				return Collections.EMPTY_LIST
-			}
-		}
-		
-		return null
 	}
 	
 	def static dimDecode(String lowerSearch) {
