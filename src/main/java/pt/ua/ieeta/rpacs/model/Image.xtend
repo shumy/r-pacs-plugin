@@ -26,7 +26,7 @@ import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
 class Image {
 	public static val INDEX = 'r_pacs_image'
 	
-	@DocEmbedded(doc = 'id,uid,number,description,datetime,modality,study(id,uid,sid,accessionNumber,description,datetime,institutionName,institutionAddress,patient(id,pid,name,sex,birthdate))')
+	@DocEmbedded(doc = 'id,uid,number,description,datetime,modality,stationName,manufacturer,manufacturerModelName,study(id,uid,sid,accessionNumber,description,datetime,institutionName,institutionAddress,patient(id,pid,name,sex,birthdate))')
 	@ManyToOne
 	@NotNull Serie serie
 	

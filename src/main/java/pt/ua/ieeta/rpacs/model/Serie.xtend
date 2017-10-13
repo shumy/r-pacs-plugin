@@ -32,6 +32,11 @@ class Serie {
 	
 	@NotNull String modality
 	
+	//Equipment
+	String stationName
+	String manufacturer
+	String manufacturerModelName
+	
 	@OneToMany(mappedBy = "serie", cascade = ALL)
 	List<Image> images
 	

@@ -93,6 +93,10 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					datetime = LocalDateTime.of(date, time)
 					
 					modality = dim.getString(Tag.Modality)
+					stationName =  dim.getString(Tag.StationName)
+					manufacturer = dim.getString(Tag.Manufacturer)
+					manufacturerModelName = dim.getString(Tag.ManufacturerModelName)
+					
 				])
 				
 				eSerie.images.add(eImage)
