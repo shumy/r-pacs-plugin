@@ -38,7 +38,11 @@ class DocSearch {
 		Tag.SeriesDescription.tagName.toLowerCase 			-> 'serie.description',
 		Tag.SeriesDate.tagName.toLowerCase 					-> 'serie.datetime',
 		Tag.SeriesTime.tagName.toLowerCase 					-> 'serie.datetime',
+		
 		Tag.Modality.tagName.toLowerCase 					-> 'serie.modality',
+		Tag.StationName.tagName.toLowerCase 				-> 'serie.stationName',
+		Tag.Manufacturer.tagName.toLowerCase 				-> 'serie.manufacturer',
+		Tag.ManufacturerModelName.tagName.toLowerCase 		-> 'serie.manufacturerModelName',
 		
 		Tag.SOPInstanceUID.tagName.toLowerCase 				-> 'uid',
 		Tag.InstanceNumber.tagName.toLowerCase 				-> 'number',
