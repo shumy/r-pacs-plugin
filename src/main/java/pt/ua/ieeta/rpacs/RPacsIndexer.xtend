@@ -20,6 +20,7 @@ import pt.ua.ieeta.rpacs.model.Patient
 import pt.ua.ieeta.rpacs.model.Serie
 import pt.ua.ieeta.rpacs.model.Study
 import pt.ua.ieeta.rpacs.utils.RPacsPluginBase
+import com.avaje.ebean.annotation.DocStoreMode
 
 class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 	static val logger = LoggerFactory.getLogger(RPacsIndexer)
@@ -62,10 +63,17 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 			val serieUID = dim.getString(Tag.SeriesInstanceUID)
 			val imageUID = dim.getString(Tag.SOPInstanceUID)
 			
+			if (patientID === null || studyUID === null || serieUID === null || imageUID === null) {
+				logger.error('NO-UIDs - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
+				return false
+			}
+			
 			val tx = Ebean.beginTransaction
+			tx.docStoreMode = DocStoreMode.IGNORE
+			
 				//process Image---------------------------------------------------------------
-				val eImage = Image.findByUID(imageUID) ?: (new Image => [
-					uid = imageUID
+				val eImage = Image.findByUID(imageUID) ?: (new Image => [ uid = imageUID ])
+				eImage => [
 					number = dim.getInt(Tag.InstanceNumber)
 					
 					photometric = dim.getString(Tag.PhotometricInterpretation)
@@ -73,17 +81,13 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					rows =  dim.getInt(Tag.Rows)
 					laterality = dim.getString(Tag.Laterality)
 					uri = storage.URI.toString
-				])
-				
-				if (eImage.id !== null) {
-					tx.rollback
-					logger.info('ALREADY-INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
-					return true
-				}
+					
+					save
+				]
 				
 				//process Serie---------------------------------------------------------------
-				val eSerie = Serie.findByUID(serieUID) ?: (new Serie => [
-					uid = serieUID
+				val eSerie = Serie.findByUID(serieUID) ?: (new Serie => [ uid = serieUID ])
+				eSerie => [
 					number = dim.getInt(Tag.SeriesNumber)
 					
 					description = dim.getString(Tag.SeriesDescription)?:''
@@ -97,19 +101,13 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					manufacturer = dim.getString(Tag.Manufacturer)
 					manufacturerModelName = dim.getString(Tag.ManufacturerModelName)
 					
-				])
-				
-				eSerie.images.add(eImage)
-				if (eSerie.id !== null) {
-					eSerie.save
-					tx.commit
-					logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
-					return true
-				}
+					images.add(eImage)
+					save
+				]
 				
 				//process Study---------------------------------------------------------------
-				val eStudy = Study.findByUID(studyUID) ?: (new Study => [
-					uid = studyUID
+				val eStudy = Study.findByUID(studyUID) ?: (new Study => [ uid = studyUID ])
+				eStudy => [
 					sid = dim.getString(Tag.StudyID)
 					accessionNumber = dim.getString(Tag.AccessionNumber)
 					
@@ -121,30 +119,26 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					
 					institutionName = dim.getString(Tag.InstitutionName)?:''
 					institutionAddress = dim.getString(Tag.InstitutionAddress)?:''
-				])
-				
-				eStudy.series.add(eSerie)
-				if (eStudy.id !== null) {
-					eStudy.save
-					tx.commit
-					logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
-					return true
-				}
+					
+					series.add(eSerie)
+					save
+				]
 				
 				//process Patient-------------------------------------------------------------
-				val ePatient = Patient.findByPID(patientID) ?: (new Patient => [
-					pid = patientID
+				val ePatient = Patient.findByPID(patientID) ?: (new Patient => [ pid = patientID ])
+				ePatient => [
 					it.name = dim.getString(Tag.PatientName)
 					sex = dim.getString(Tag.PatientSex)?:'O'
 					birthdate = getDate(dim.getString(Tag.PatientBirthDate))
-				])
+					
+					studies.add(eStudy)
+					save
+				]
 				
-				ePatient.studies.add(eStudy)
-				ePatient.save
 			tx.commit
 			logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
 			return true
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error('INDEX-FAILED - {} {}', storage.URI, e.message)
 			Ebean.rollbackTransaction
 			e.printStackTrace
