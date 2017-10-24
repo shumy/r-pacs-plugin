@@ -53,6 +53,7 @@ class DocSearch {
 		
 		//annotations
 		'annotation' 										-> 'annotations.nodes.type.name',
+		'annotator'											-> 'annotations.annotator.alias',
 		//'field' 											-> 'annotations.nodes.fields',
 		
 		//search ui alias
