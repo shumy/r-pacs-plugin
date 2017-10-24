@@ -6,6 +6,7 @@ import picocli.CommandLine
 import pt.ua.ieeta.rpacs.model.Image
 import pt.ua.ieeta.rpacs.utils.DefaultConfig
 import pt.ua.ieeta.rpacs.utils.DocSearch
+import com.avaje.ebean.Ebean
 
 class RPacsCli {
 	
@@ -64,6 +65,9 @@ class RPacsCli {
 					srv.docStore.indexAll(Image)
 					val endTime   = System.currentTimeMillis
 					println('''Indexed (Image -> «Image.INDEX») in «endTime - startTime» ms''')
+				} else {
+					Ebean.defaultServer.docStore.indexByQuery(Image.find.query.setId(cmd.index))
+					println('''Indexed (Image -> «cmd.index»)''')
 				}
 				
 				return
