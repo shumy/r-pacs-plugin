@@ -62,6 +62,7 @@ class DocSearch {
 		'birthdate'											-> 'serie.study.patient.birthdate',
 		'sex'												-> 'serie.study.patient.sex',
 		
+		'createdat'											-> 'annotations.nodes.createdAt',
 		'readability'										-> 'annotations.nodes.fields.quality',
 		'centered'											-> 'annotations.nodes.fields.local',
 		'retinopathy'										-> 'annotations.nodes.fields.retinopathy',
