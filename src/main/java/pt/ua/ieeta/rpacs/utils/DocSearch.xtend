@@ -8,11 +8,11 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import org.apache.commons.lang.StringUtils
 import org.dcm4che2.data.Tag
 import pt.ua.ieeta.rpacs.model.Image
 
 import static extension pt.ua.ieeta.rpacs.model.DicomTags.*
+import org.apache.commons.lang.StringUtils
 
 class DocSearch {
 	public static val JSON = MediaType.parse("application/json; charset=utf-8")
@@ -64,6 +64,7 @@ class DocSearch {
 		'sex'												-> 'serie.study.patient.sex',
 		
 		'createdat'											-> 'annotations.nodes.createdAt',
+		'nodetype'											-> 'annotations.nodes.type.name',
 		'readability'										-> 'annotations.nodes.fields.quality',
 		'centered'											-> 'annotations.nodes.fields.local',
 		'retinopathy'										-> 'annotations.nodes.fields.retinopathy',
@@ -72,16 +73,8 @@ class DocSearch {
 		'comorbidities'										-> 'annotations.nodes.fields.diseases',
 		'lesions' 											-> 'annotations.nodes.fields.lesions.type',
 		
-		'dataset'											-> 'datasets.name',
-		
-		//others
-		' to ' 												-> ' TO ',
-		' and ' 											-> ' AND ',
-		' or ' 												-> ' OR '
+		'dataset'											-> 'datasets.name'
 	}
-	
-	public static val String[] keyMaps = mappings.keySet
-	public static val String[] valueMaps = mappings.values
 	
 	def static List<Image> search(String qText, int from, int size) {
 		val lowerSearch = qText.toLowerCase
@@ -122,8 +115,26 @@ class DocSearch {
 	}
 	
 	def static dimDecode(String lowerSearch) {
-		val datesFixed = lowerSearch.replaceAll('\\[([0-9]{4})([0-9]{2})([0-9]{2}) to ([0-9]{4})([0-9]{2})([0-9]{2})\\]', '[$1-$2-$3 TO $4-$5-$6]')
-		StringUtils.replaceEach(datesFixed, keyMaps, valueMaps)
+		val query = lowerSearch.replaceAll('\\[([0-9]{4})([0-9]{2})([0-9]{2}) to ([0-9]{4})([0-9]{2})([0-9]{2})\\]', '[$1-$2-$3 TO $4-$5-$6]')
+		
+		val pattern = Pattern.compile('(\\w+)\\s*:')
+		val matcher = pattern.matcher(query)
+		
+		var int last = 0
+		val sb = new StringBuilder
+		while (matcher.find) {
+			val field = matcher.group(1)
+			val replacer = mappings.get(field) ?: field
+			println('''DECODE: «field» -> «replacer»''')
+			
+			sb.append(query.substring(last, matcher.start(1)))
+			sb.append(replacer)
+			
+			last = matcher.end(1)
+		}
+		sb.append(query.substring(last, query.length))
+		
+		return StringUtils.replaceEach(sb.toString, #[' to ', ' and ', ' or '], #[' TO ', ' AND ', ' OR '])
 	}
 	
 	def static post(String url, String json) {
