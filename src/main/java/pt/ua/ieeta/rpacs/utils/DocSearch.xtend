@@ -84,7 +84,7 @@ class DocSearch {
 		
 		val results = try {
 			val images = post('http://localhost:9200/' + Image.INDEX + '/image/_search', '''{
-				"from": «from», "size": «size»,
+				"from": «from», «IF size !== 0»"size": «size»,«ENDIF»
 				"sort": ["_doc"],
 				"stored_fields": [ "_id" ],
 				"query": {

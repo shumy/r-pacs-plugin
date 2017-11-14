@@ -6,6 +6,22 @@ delete from pointer;
 update pointer set next = 1, last = 0;
 */
 
+
+select * from annotator;
+
+/*deleting invalid annotations*/
+select * from node
+--delete from node
+where annotation_id in (select id from annotation where annotator_id in (3, 5)); 
+
+select * from annotation
+--delete from annotation
+where annotator_id in (3, 5);
+
+select * from pointer
+--delete from pointer
+where annotator_id in (3, 5);
+
 --dataset pointers--
 select
   ds.id,
