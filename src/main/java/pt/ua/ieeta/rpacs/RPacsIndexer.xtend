@@ -82,7 +82,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					laterality = dim.getString(Tag.Laterality)
 					uri = storage.URI.toString
 					
-					save
+					//save
 				]
 				
 				//process Serie---------------------------------------------------------------
@@ -102,7 +102,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					manufacturerModelName = dim.getString(Tag.ManufacturerModelName)
 					
 					images.add(eImage)
-					save
+					//save
 				]
 				
 				//process Study---------------------------------------------------------------
@@ -121,7 +121,7 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					institutionAddress = dim.getString(Tag.InstitutionAddress)?:''
 					
 					series.add(eSerie)
-					save
+					//save
 				]
 				
 				//process Patient-------------------------------------------------------------
@@ -132,8 +132,13 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					birthdate = getDate(dim.getString(Tag.PatientBirthDate))
 					
 					studies.add(eStudy)
-					save
+					//save
 				]
+				
+				eImage.save
+				eSerie.save
+				eStudy.save
+				ePatient.save
 				
 			tx.commit
 			logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
