@@ -135,10 +135,10 @@ class RPacsIndexer extends RPacsPluginBase implements IndexerInterface {
 					//save
 				]
 				
-				eImage.save
-				eSerie.save
-				eStudy.save
 				ePatient.save
+				eStudy.save
+				eSerie.save
+				eImage.save
 				
 			tx.commit
 			logger.info('INDEXED - ({}, {}, {}, {})', patientID, studyUID, serieUID, imageUID)
