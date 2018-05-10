@@ -64,7 +64,22 @@ class RPacsCli {
 					val startTime = System.currentTimeMillis
 					srv.docStore.indexAll(Image)
 					val endTime   = System.currentTimeMillis
-					println('''Indexed (Image -> «Image.INDEX») in «endTime - startTime» ms''')
+					println('''Indexed in «endTime - startTime» ms''')
+				} else if (cmd.index.contains('-')) {
+					val range = cmd.index.split("-")
+					val from = Integer.parseInt(range.get(0))
+					val to = Integer.parseInt(range.get(1))
+					
+					println('''Range («from» TO «to»)''')
+					
+					val query = Image.find.query
+						.where.between("id", from, to)
+						.query
+					
+					val startTime = System.currentTimeMillis
+					Ebean.defaultServer.docStore.indexByQuery(query)
+					val endTime   = System.currentTimeMillis
+					println('''Indexed in «endTime - startTime» ms''')
 				} else {
 					Ebean.defaultServer.docStore.indexByQuery(Image.find.query.setId(cmd.index))
 					println('''Indexed (Image -> «cmd.index»)''')
