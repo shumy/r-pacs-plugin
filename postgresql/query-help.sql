@@ -6,8 +6,12 @@ delete from pointer;
 update pointer set next = 1, last = 0;
 */
 
+select count(*) from study; --studies 7350
+select count(*) from serie; --series 16083
+select count(*) from image; --images 30985
 
-select * from annotator;
+select count(*), count(distinct image_id) from annotation; -- a total of 3302 annotations from 1185 distincts images
+select count(distinct annotation_id) from node where type_id = 4;
 
 /*deleting invalid annotations*/
 select * from node
@@ -21,6 +25,28 @@ where annotator_id in (3, 5);
 select * from pointer
 --delete from pointer
 where annotator_id in (3, 5);
+
+--assigned dataset--
+select
+  an.id, an.alias, an.name, ds.id, ds.name
+from dataset ds, annotator an
+where ds.id  = an.current_dataset_id
+and an.name in ('susanaapenas', 'amvgcarneiro', 'carolinamaia', 'luismendonc', 'ricardopereira');
+
+--my datasets--
+select
+  an.id, an.alias, an.name, ds.id, ds.name
+from dataset ds, dataset_annotator dsa, annotator an
+where ds.id  = dsa.dataset_id and dsa.annotator_id = an.id
+and an.name in ('susanaapenas', 'amvgcarneiro', 'carolinamaia', 'luismendonc', 'ricardopereira')
+order by an.id, ds.id;
+
+--remove from my-datasets--
+select * from dataset_annotator dsa
+--delete from dataset_annotator dsa
+where dsa.dataset_id not in (select id from dataset where name in ('Dataset_22Nov','Dataset_Lesions_001','Dataset_Lesions_002','Dataset_Lesions_003','Dataset_Lesions_004'))
+and dsa.annotator_id in (select id from annotator where name in ('susanaapenas', 'amvgcarneiro', 'carolinamaia', 'luismendonc', 'ricardopereira'));
+
 
 --dataset pointers--
 select
@@ -72,10 +98,15 @@ from annotation an, annotator at where an.annotator_id = at.id
 and at.name = 'susanaapenas'
 order by an.created_at;
 
---annotation timeSpent statistics
-select
- annotation_id, created_at,
- (select name from node_type where id = n.type_id),
- fields->>'timeSpent'
-from node n order by annotation_id, created_at;
 
+--Time stats--
+select t_time / 3600 as total_time, t_time / t_number as avg_pet_an, t_number as total_number from 
+  (select sum(spent) as t_time, count(*) as t_number from
+    (select cast(fields->key->>'timeSpent' as double precision) as spent from
+      (select id, fields, jsonb_object_keys(fields) as key from node where type_id = 4) sub1
+    ) sub2 where spent > 0 and spent < 400) sub3 
+;
+
+2688 -> 17.9h
+3207 -> 21.4h / 45.6h
+    
